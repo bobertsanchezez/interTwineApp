@@ -1,5 +1,7 @@
 package edu.brown.cs.student.main.server;
 
+import java.util.Map;
+
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
@@ -7,30 +9,16 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import org.bson.Document;
 
 public class MongoClientConnection {
     public static MongoClient startConnection() throws MongoException {
-        // GRAB CREDENTIALS FROM /private/connection-creds.txt in form
-        // "username password"
-        String username;
-        String password;
-        try {
-            String connectionCreds = new String(
-                    Files.readAllBytes(Paths.get("/private/connection-creds.txt")));
-            String[] creds = connectionCreds.split(connectionCreds);
-            username = creds[0];
-            password = creds[1];
-        } catch (IOException | IndexOutOfBoundsException e) {
-            throw new MongoException("Failed to read connection credentials from file", e);
+        // NOTE: set a system variable containing creds for this to work!
+        String connectionCreds = System.getenv("CONNECTION_CREDS");
+        if (connectionCreds == null) {
+            throw new MongoException("Failed to read connection credentials from file");
         }
-        String connectionString = "mongodb+srv://" + username + ":" + password
+        // specify details of connection to MongoDB
+        String connectionString = "mongodb+srv://" + connectionCreds
                 + "@cs32.oyxzxfh.mongodb.net/?retryWrites=true&w=majority";
         ServerApi serverApi = ServerApi.builder()
                 .version(ServerApiVersion.V1)
@@ -39,7 +27,7 @@ public class MongoClientConnection {
                 .applyConnectionString(new ConnectionString(connectionString))
                 .serverApi(serverApi)
                 .build();
-        // Create a new client and connect to the server
+        // Create a new client and connect to MongoDB
         MongoClient mongoClient = MongoClients.create(settings);
         return mongoClient;
     }
