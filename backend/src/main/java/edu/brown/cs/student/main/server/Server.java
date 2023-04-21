@@ -1,6 +1,15 @@
 package edu.brown.cs.student.main.server;
 
 import static spark.Spark.after;
+
+import edu.brown.cs.student.main.server.handlers.passages.PassageDeleteHandler;
+import edu.brown.cs.student.main.server.handlers.passages.PassageGetHandler;
+import edu.brown.cs.student.main.server.handlers.passages.PassagePostHandler;
+import edu.brown.cs.student.main.server.handlers.passages.PassagePutHandler;
+import edu.brown.cs.student.main.server.handlers.stories.StoryDeleteHandler;
+import edu.brown.cs.student.main.server.handlers.stories.StoryGetHandler;
+import edu.brown.cs.student.main.server.handlers.stories.StoryPostHandler;
+import edu.brown.cs.student.main.server.handlers.stories.StoryPutHandler;
 import spark.Spark;
 
 /**
@@ -16,9 +25,15 @@ public class Server {
                     response.header("Access-Control-Allow-Methods", "*");
                 });
 
-        // Setting up the handler for the GET /redlining endpoint
-        // Spark.get("redlining", new
-        // redliningHandler("backend/data/geo/fullDownload.json", 100));
+        // Setting up HTTP endpoints for stories, passages
+        Spark.get("/stories", new StoryGetHandler());
+        Spark.get("/passages", new PassageGetHandler());
+        Spark.post("/stories", new StoryPostHandler());
+        Spark.post("/passages", new PassagePostHandler());
+        Spark.put("/stories/:id", new StoryPutHandler());
+        Spark.put("/passages/:id", new PassagePutHandler());
+        Spark.delete("/stories/:id", new StoryDeleteHandler());
+        Spark.delete("/passages/:id", new PassageDeleteHandler());
 
         Spark.init();
         Spark.awaitInitialization();

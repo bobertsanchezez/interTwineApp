@@ -22,6 +22,17 @@
     <spotless.version>2.22.8</spotless.version>
   </properties>
   <dependencies>
+
+    
+    <!--
+     MongoDB dependency for database support
+    -->
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongodb-driver-sync</artifactId>
+      <version>4.3.4</version>
+    </dependency>
+
     <!--
      We use Moshi for serialization/deserialization of JSON data.
      Moshi 1.13.0 was released in December 2021.
