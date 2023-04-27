@@ -14,7 +14,7 @@ import spark.Response;
 import spark.Route;
 
 public class MongoDBHandler implements Route {
-    MongoClient mongoClient;
+    protected MongoClient mongoClient;
 
     public MongoDBHandler(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
