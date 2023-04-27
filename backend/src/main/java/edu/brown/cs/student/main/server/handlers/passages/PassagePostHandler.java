@@ -1,15 +1,23 @@
 package edu.brown.cs.student.main.server.handlers.passages;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.Document;
+import org.eclipse.jetty.util.IO;
+
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
+import edu.brown.cs.student.main.server.types.Passage;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -33,12 +41,26 @@ public class PassagePostHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        int size = request.queryParams().size();
-        if (size == 0) {
-            return serialize(handlerFailureResponse(null, null));
+        String data = request.queryParams("data");
+        if (data == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> must be supplied (jsonified Passage data)"));
         }
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);
+        Passage passage;
+        try {
+            passage = adapter.fromJson(data);
+        } catch (JsonDataException | IOException e) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> could not be converted to Passage format"));
+        }
+        MongoDatabase database = mongoClient.getDatabase("interTwine");
+        MongoCollection<Document> collection = database.getCollection("passages");
 
-        return serialize(handlerSuccessResponse(null));
+        // collection.insertOne(passage);
+
+        return serialize(handlerSuccessResponse(""));
     }
 
 }
