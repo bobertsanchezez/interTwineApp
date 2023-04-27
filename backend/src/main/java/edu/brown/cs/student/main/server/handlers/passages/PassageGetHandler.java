@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.mongodb.client.model.Filters.eq;
+
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -46,11 +48,16 @@ public class PassageGetHandler extends MongoDBHandler {
                     handlerFailureResponse("error_bad_request",
                             "passage id <id> is a required query parameter (usage: /stories?id=12345)"));
         }
-
         MongoDatabase database = mongoClient.getDatabase("interTwine");
         MongoCollection<Document> collection = database.getCollection("passages");
-        Document doc = collection.find(eq("id", id))
-                .first();
+        Document doc;
+        try {
+            doc = collection.find(eq("id", id))
+                    .first();
+        } catch (MongoException e) {
+            return serialize(
+                    handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
+        }
         if (doc == null) {
             return serialize(
                     handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
@@ -58,7 +65,7 @@ public class PassageGetHandler extends MongoDBHandler {
             if (doc.getBoolean("claimed")) {
                 String userId = doc.getString("user");
                 return serialize(
-                        postFailureResponse("error_claimed", userId,
+                        claimFailureResponse("error_claimed", userId,
                                 "user " + userId + " has already claimed the passage"));
             }
             return serialize(handlerSuccessResponse(doc.toJson()));
@@ -66,7 +73,7 @@ public class PassageGetHandler extends MongoDBHandler {
 
     }
 
-    private Map<String, Object> postFailureResponse(String responseType, String userId, String errorMessage) {
+    private Map<String, Object> claimFailureResponse(String responseType, String userId, String errorMessage) {
         Map<String, Object> responses = new HashMap<>();
         responses.put("result", responseType);
         responses.put("user", userId);

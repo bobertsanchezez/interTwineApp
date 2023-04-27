@@ -1,8 +1,18 @@
 package edu.brown.cs.student.main.server.types;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Passage {
+import org.bson.BsonArray;
+import org.bson.BsonBoolean;
+import org.bson.BsonDocument;
+import org.bson.BsonInt32;
+import org.bson.BsonString;
+import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
+
+public class Passage implements Bson {
     private int height;
     private boolean highlighted;
     private String id;
@@ -137,4 +147,24 @@ public class Passage {
     public void setUser(String user) {
         this.user = user;
     }
+
+    @Override
+    public <TDocument> BsonDocument toBsonDocument(Class<TDocument> document, CodecRegistry registry) {
+        BsonDocument bsonDocument = new BsonDocument();
+        bsonDocument.put("height", new BsonInt32(this.height));
+        bsonDocument.put("highlighted", new BsonBoolean(this.highlighted));
+        bsonDocument.put("id", new BsonString(this.id));
+        bsonDocument.put("left", new BsonInt32(this.left));
+        bsonDocument.put("name", new BsonString(this.name));
+        bsonDocument.put("selected", new BsonBoolean(this.selected));
+        bsonDocument.put("story", new BsonString(this.story));
+        bsonDocument.put("tags", new BsonArray(this.tags.stream().map(BsonString::new).collect(Collectors.toList())));
+        bsonDocument.put("text", new BsonString(this.text));
+        bsonDocument.put("top", new BsonInt32(this.top));
+        bsonDocument.put("width", new BsonInt32(this.width));
+        bsonDocument.put("claimed", new BsonBoolean(this.claimed));
+        bsonDocument.put("user", new BsonString(this.user));
+        return bsonDocument;
+    }
+
 }

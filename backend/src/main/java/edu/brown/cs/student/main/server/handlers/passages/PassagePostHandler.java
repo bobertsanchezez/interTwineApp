@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.eclipse.jetty.util.IO;
 
@@ -55,10 +56,20 @@ public class PassagePostHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> could not be converted to Passage format"));
         }
-        MongoDatabase database = mongoClient.getDatabase("interTwine");
-        MongoCollection<Document> collection = database.getCollection("passages");
-
-        // collection.insertOne(passage);
+        if (passage == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> was null after json adaptation"));
+        }
+        try {
+            MongoDatabase database = mongoClient.getDatabase("interTwine");
+            MongoCollection<Document> collection = database.getCollection("passages");
+            BsonDocument bsonDocument = passage.toBsonDocument();
+            Document document = Document.parse(bsonDocument.toJson());
+            collection.insertOne(document);
+        } catch (Exception e) {
+            return serialize(handlerFailureResponse("error_datasource",
+                    "Given passage could not be inserted into collection: " + e.getStackTrace().toString()));
+        }
 
         return serialize(handlerSuccessResponse(""));
     }
