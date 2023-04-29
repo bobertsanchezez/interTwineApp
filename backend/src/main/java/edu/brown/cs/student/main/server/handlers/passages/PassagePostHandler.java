@@ -42,10 +42,16 @@ public class PassagePostHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        String data = request.queryParams("data");
+        String data;
+        if (request.body().length() != 0) {
+            data = request.body();
+        } else {
+            data = request.queryParams("data");
+        }
+
         if (data == null) {
             return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> must be supplied (jsonified Passage data)"));
+                    "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
         }
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);
@@ -66,12 +72,12 @@ public class PassagePostHandler extends MongoDBHandler {
             BsonDocument bsonDocument = passage.toBsonDocument();
             Document document = Document.parse(bsonDocument.toJson());
             collection.insertOne(document);
+            return serialize(handlerSuccessResponse(document));
         } catch (Exception e) {
             return serialize(handlerFailureResponse("error_datasource",
                     "Given passage could not be inserted into collection: " + e.getStackTrace().toString()));
         }
 
-        return serialize(handlerSuccessResponse(""));
     }
 
 }

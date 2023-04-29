@@ -4,7 +4,14 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.Document;
+import static com.mongodb.client.model.Filters.eq;
+
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -33,12 +40,23 @@ public class PassageDeleteHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        int size = request.queryParams().size();
-        if (size == 0) {
-            return serialize(handlerFailureResponse(null, null));
+        String id = request.params(":id");
+        if (id == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/passages/<id>)"));
+        } else if (id.length() == 0) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/passages/<id>)"));
         }
-
-        return serialize(handlerSuccessResponse(null));
+        MongoDatabase database = mongoClient.getDatabase("interTwine");
+        MongoCollection<Document> collection = database.getCollection("passages");
+        Document toDelete = new Document("id", id);
+        DeleteResult res = collection.deleteOne(toDelete);
+        if (res.getDeletedCount() == 0) {
+            return serialize(handlerFailureResponse("error_datasource",
+                    "Delete failed: no document with id " + id + " contained in the database"));
+        }
+        return serialize(handlerSuccessResponse(id));
     }
 
 }
