@@ -28,29 +28,21 @@ public class Main {
                     response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
                 });
 
-        // set up 8 distinct connections to MongoDB; one for each handler
-        // this is done to not overload a given connection
-        MongoClient mc1 = MongoClientConnection.startConnection();
-        MongoClient mc2 = MongoClientConnection.startConnection();
-        MongoClient mc3 = MongoClientConnection.startConnection();
-        MongoClient mc4 = MongoClientConnection.startConnection();
-        MongoClient mc5 = MongoClientConnection.startConnection();
-        MongoClient mc6 = MongoClientConnection.startConnection();
-        MongoClient mc7 = MongoClientConnection.startConnection();
-        MongoClient mc8 = MongoClientConnection.startConnection();
+        // set up one connection to MongoDB, shared with all servers
+        MongoClient mc = MongoClientConnection.startConnection();
 
         // Setting up HTTP endpoints for stories, passages
         // /stories GET, POST, PUT, DELETE endpoints
-        Spark.get("/stories", new StoryGetHandler(mc1));
-        Spark.post("/stories", new StoryPostHandler(mc2));
-        Spark.put("/stories/:id", new StoryPutHandler(mc3));
-        Spark.delete("/stories/:id", new StoryDeleteHandler(mc4));
+        Spark.get("/stories", new StoryGetHandler(mc));
+        Spark.post("/stories", new StoryPostHandler(mc));
+        Spark.put("/stories/:id", new StoryPutHandler(mc));
+        Spark.delete("/stories/:id", new StoryDeleteHandler(mc));
 
         // /passages GET, POST, PUT, DELETE endpoints
-        Spark.get("/passages", new PassageGetHandler(mc5));
-        Spark.post("/passages", new PassagePostHandler(mc6));
-        Spark.put("/passages/:id", new PassagePutHandler(mc7));
-        Spark.delete("/passages/:id", new PassageDeleteHandler(mc8));
+        Spark.get("/passages", new PassageGetHandler(mc));
+        Spark.post("/passages", new PassagePostHandler(mc));
+        Spark.put("/passages/:id", new PassagePutHandler(mc));
+        Spark.delete("/passages/:id", new PassageDeleteHandler(mc));
 
         // Options setup
         Spark.options("/*", (request, response) -> {

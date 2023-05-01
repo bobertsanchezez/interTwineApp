@@ -1,19 +1,23 @@
 package edu.brown.cs.student.main.server.handlers.passages;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.BsonDocument;
 import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
+import edu.brown.cs.student.main.server.types.Passage;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -43,15 +47,38 @@ public class PassagePutHandler extends MongoDBHandler {
                     handlerFailureResponse("error_bad_request",
                             "passage id <id> is a required query parameter (usage: PUT request to .../passages/<id>)"));
         }
-        String newText = request.body();
+        String data = request.body();
+
+        if (data == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
+        }
         MongoDatabase database = mongoClient.getDatabase("interTwine");
         MongoCollection<Document> collection = database.getCollection("passages");
-        Document filter = new Document("id", id);
-        Document update = new Document("$set", new Document("text", newText));
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);
+        Passage passage;
+        try {
+            passage = adapter.fromJson(data);
+        } catch (JsonDataException | IOException e) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> could not be converted to Passage format"));
+        }
+        if (passage == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> was null after json adaptation"));
+        }
+        try {
+            BsonDocument bsonDocument = passage.toBsonDocument();
+            Document filter = new Document("id", id);
+            Document document = Document.parse(bsonDocument.toJson());
+            collection.replaceOne(filter, document);
+            return serialize(handlerSuccessResponse(document));
+        } catch (Exception e) {
+            return serialize(handlerFailureResponse("error_datasource",
+                    "Given passage could not updated: " + e.getStackTrace().toString()));
+        }
 
-        collection.updateOne(filter, update);
-
-        return serialize(handlerSuccessResponse(newText));
     }
 
 }
