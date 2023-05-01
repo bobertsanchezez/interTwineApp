@@ -5,6 +5,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import org.bson.BsonDocument;
 import org.bson.Document;
 
@@ -75,8 +78,12 @@ public class PassagePutHandler extends MongoDBHandler {
             collection.replaceOne(filter, document);
             return serialize(handlerSuccessResponse(document));
         } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Given passage could not updated: " + e.getStackTrace().toString()));
+                    "Given passage could not updated: " + sStackTrace));
         }
 
     }

@@ -5,6 +5,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.eclipse.jetty.util.IO;
@@ -74,8 +77,12 @@ public class PassagePostHandler extends MongoDBHandler {
             collection.insertOne(document);
             return serialize(handlerSuccessResponse(document));
         } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Given passage could not be inserted into collection: " + e.getStackTrace().toString()));
+                    "Given passage could not be inserted into collection: " + sStackTrace));
         }
 
     }
