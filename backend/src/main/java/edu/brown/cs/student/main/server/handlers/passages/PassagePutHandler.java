@@ -4,7 +4,11 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.Document;
+
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
@@ -33,12 +37,21 @@ public class PassagePutHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        int size = request.queryParams().size();
-        if (size == 0) {
-            return serialize(handlerFailureResponse(null, null));
+        String id = request.params("id");
+        if (id == null) {
+            return serialize(
+                    handlerFailureResponse("error_bad_request",
+                            "passage id <id> is a required query parameter (usage: PUT request to .../passages/<id>)"));
         }
+        String newText = request.body();
+        MongoDatabase database = mongoClient.getDatabase("interTwine");
+        MongoCollection<Document> collection = database.getCollection("passages");
+        Document filter = new Document("id", id);
+        Document update = new Document("$set", new Document("text", newText));
 
-        return serialize(handlerSuccessResponse(null));
+        collection.updateOne(filter, update);
+
+        return serialize(handlerSuccessResponse(newText));
     }
 
 }
