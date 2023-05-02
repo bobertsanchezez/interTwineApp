@@ -70,7 +70,7 @@ public class PassagePostHandler extends MongoDBHandler {
                     "data payload <data> was null after json adaptation"));
         }
         try {
-            MongoDatabase database = mongoClient.getDatabase("interTwine");
+            MongoDatabase database = mongoClient.getDatabase("InterTwine");
             MongoCollection<Document> collection = database.getCollection("passages");
             BsonDocument bsonDocument = passage.toBsonDocument();
             Document document = Document.parse(bsonDocument.toJson());

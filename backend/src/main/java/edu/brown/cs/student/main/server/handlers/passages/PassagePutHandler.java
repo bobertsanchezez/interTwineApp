@@ -56,7 +56,7 @@ public class PassagePutHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
         }
-        MongoDatabase database = mongoClient.getDatabase("interTwine");
+        MongoDatabase database = mongoClient.getDatabase("InterTwine");
         MongoCollection<Document> collection = database.getCollection("passages");
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);

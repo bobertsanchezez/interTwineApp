@@ -48,7 +48,7 @@ public class PassageGetHandler extends MongoDBHandler {
                     handlerFailureResponse("error_bad_request",
                             "passage id <id> is a required query parameter (usage: /passages?id=12345)"));
         }
-        MongoDatabase database = mongoClient.getDatabase("interTwine");
+        MongoDatabase database = mongoClient.getDatabase("InterTwine");
         MongoCollection<Document> collection = database.getCollection("passages");
         Document doc;
         try {

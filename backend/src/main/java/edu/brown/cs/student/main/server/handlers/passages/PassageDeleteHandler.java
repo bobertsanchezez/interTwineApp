@@ -52,7 +52,7 @@ public class PassageDeleteHandler extends MongoDBHandler {
                     "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/passages/<id>)"));
         }
         try {
-            MongoDatabase database = mongoClient.getDatabase("interTwine");
+            MongoDatabase database = mongoClient.getDatabase("InterTwine");
             MongoCollection<Document> collection = database.getCollection("passages");
             Document toDelete = new Document("id", id);
             DeleteResult res = collection.deleteOne(toDelete);
