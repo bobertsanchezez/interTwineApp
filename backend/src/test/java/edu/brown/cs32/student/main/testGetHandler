@@ -1,0 +1,26 @@
+@Test
+// Recall that the "throws IOException" doesn't signify anything but
+// acknowledgement to the type checker
+public void testIncorrectArgsLoaded() throws IOException {
+  HttpURLConnection clientConnection = tryRequest("load");
+  // Get an OK response (the *connection* worked, the *API* provides an error
+  // response)
+  assertEquals(200, clientConnection.getResponseCode());
+  // Now we need to see whether we've got the expected Json response.
+  // SoupAPIUtilities handles ingredient lists, but that's not what we've got
+  // here.
+  Moshi moshi = new Moshi.Builder().build();
+  JsonAdapter<Map<String, Object>> adapter = moshi.adapter(
+      Types.newParameterizedType(Map.class, String.class, Object.class));
+
+  Map resp = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+
+  assertEquals("error_bad_request", resp.get("result"));
+  assertEquals("Please input a filepath. Current supported filepaths: [empty.csv, stars.csv, ten-stars.csv]",
+      resp.get("errorMessage"));
+
+
+  clientConnection.disconnect();
+}
+
+/**
