@@ -4,6 +4,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import org.bson.Document;
 import static com.mongodb.client.model.Filters.eq;
 
@@ -48,15 +51,24 @@ public class PassageDeleteHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/passages/<id>)"));
         }
-        MongoDatabase database = mongoClient.getDatabase("interTwine");
-        MongoCollection<Document> collection = database.getCollection("passages");
-        Document toDelete = new Document("id", id);
-        DeleteResult res = collection.deleteOne(toDelete);
-        if (res.getDeletedCount() == 0) {
+        try {
+            MongoDatabase database = mongoClient.getDatabase("interTwine");
+            MongoCollection<Document> collection = database.getCollection("passages");
+            Document toDelete = new Document("id", id);
+            DeleteResult res = collection.deleteOne(toDelete);
+            if (res.getDeletedCount() == 0) {
+                return serialize(handlerFailureResponse("error_datasource",
+                        "Delete failed: no document with id " + id + " contained in the database"));
+            }
+            return serialize(handlerSuccessResponse(id));
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Delete failed: no document with id " + id + " contained in the database"));
+                    "Given passage could not be inserted into collection: " + sStackTrace));
         }
-        return serialize(handlerSuccessResponse(id));
     }
 
 }
