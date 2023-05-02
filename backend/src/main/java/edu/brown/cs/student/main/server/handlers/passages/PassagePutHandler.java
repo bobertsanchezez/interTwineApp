@@ -14,6 +14,7 @@ import org.bson.Document;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.ReplaceOptions;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
@@ -75,7 +76,8 @@ public class PassagePutHandler extends MongoDBHandler {
             BsonDocument bsonDocument = passage.toBsonDocument();
             Document filter = new Document("id", id);
             Document document = Document.parse(bsonDocument.toJson());
-            collection.replaceOne(filter, document);
+            ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
+            collection.replaceOne(filter, document, upsertOption);
             return serialize(handlerSuccessResponse(document));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
