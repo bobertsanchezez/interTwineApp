@@ -1,6 +1,5 @@
 package edu.brown.cs.student.main.server.handlers.passages;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,19 +9,11 @@ import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Projections;
-import com.mongodb.client.model.Sorts;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
-import edu.brown.cs.student.main.server.types.Passage;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 /**
  * Handler class for the redlining API endpoint.
@@ -46,7 +37,7 @@ public class PassageGetHandler extends MongoDBHandler {
         if (id == null) {
             return serialize(
                     handlerFailureResponse("error_bad_request",
-                            "passage id <id> is a required query parameter (usage: /passages?id=12345)"));
+                            "passage id <id> is a required query parameter (usage: GET request to .../passages?id=12345)"));
         }
         MongoDatabase database = mongoClient.getDatabase("InterTwine");
         MongoCollection<Document> collection = database.getCollection("passages");

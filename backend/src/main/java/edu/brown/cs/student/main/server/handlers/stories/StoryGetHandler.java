@@ -1,18 +1,17 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import static com.mongodb.client.model.Filters.eq;
 
+import org.bson.Document;
+
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 /**
  * Handler class for the redlining API endpoint.
@@ -33,12 +32,28 @@ public class StoryGetHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        int size = request.queryParams().size();
-        if (size == 0) {
-            return serialize(handlerFailureResponse(null, null));
+        String id = request.queryParams("id");
+        if (id == null) {
+            return serialize(
+                    handlerFailureResponse("error_bad_request",
+                            "story id <id> is a required query parameter (usage: GET request to .../stories?id=12345)"));
         }
-
-        return serialize(handlerSuccessResponse(null));
+        MongoDatabase database = mongoClient.getDatabase("InterTwine");
+        MongoCollection<Document> collection = database.getCollection("stories");
+        Document doc;
+        try {
+            doc = collection.find(eq("id", id))
+                    .first();
+        } catch (MongoException e) {
+            return serialize(
+                    handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
+        }
+        if (doc == null) {
+            return serialize(
+                    handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
+        } else {
+            return serialize(handlerSuccessResponse(doc.toJson()));
+        }
     }
 
 }

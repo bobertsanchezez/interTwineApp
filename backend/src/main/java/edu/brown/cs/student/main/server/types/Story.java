@@ -1,242 +1,312 @@
-// package edu.brown.cs.student.main.server.types;
+package edu.brown.cs.student.main.server.types;
 
-// import java.util.Date;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-// public class Story {
-// /**
-// * IFID of the story. An IFID should stay stable when a story is imported or
-// * exported.
-// */
-// private String ifid;
-// /**
-// * GUID identifying the story.
-// */
-// private String id;
-// /**
-// * When the story was last changed.
-// */
-// private Date lastUpdate;
-// /**
-// * Name of the story.
-// */
-// private String name;
-// /**
-// * Passages in the story.
-// */
-// private Passage[] passages;
-// /**
-// * Author-created JavaScript associated with the story.
-// */
-// private String script;
-// /**
-// * Is the story currently selected by the user?
-// */
-// private boolean selected;
-// /**
-// * Should passages snap to a grid?
-// */
-// private boolean snapToGrid;
-// /**
-// * ID of the passage that the story begins at.
-// */
-// private String startPassage;
-// /**
-// * Name of the story format the story uses.
-// */
-// private String storyFormat;
-// /**
-// * Version of the story format that this story uses.
-// */
-// private String storyFormatVersion;
-// /**
-// * Author-created CSS associated with the story.
-// */
-// private String stylesheet;
-// /**
-// * Tags applied to the story.
-// */
-// private String[] tags;
-// /**
-// * Author-specified colors for passage tags.
-// */
-// private TagColors tagColors;
-// /**
-// * Zoom level the story is displayed at.
-// */
-// private int zoom;
-// /**
-// * InterTwine Dev Tools under here.
-// */
+import org.bson.BsonArray;
+import org.bson.BsonBoolean;
+import org.bson.BsonDateTime;
+import org.bson.BsonDocument;
+import org.bson.BsonInt32;
+import org.bson.BsonObjectId;
+import org.bson.BsonString;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
-// /**
-// * Owner of the story.
-// */
-// private String owner;
-// /**
-// * People who are allowed to edit the story.
-// */
-// private String[] editors;
+public class Story implements Bson {
+    /**
+     * IFID of the story. An IFID should stay stable when a story is imported or
+     * exported.
+     */
+    private String ifid;
+    /**
+     * GUID identifying the story.
+     */
+    private String id;
+    /**
+     * When the story was last changed.
+     */
+    private Date lastUpdate;
+    /**
+     * Name of the story.
+     */
+    private String name;
+    /**
+     * IDs of Passages in the story.
+     */
+    private List<ObjectId> passageIds;
+    /**
+     * Passages in the story.
+     */
+    private Passage[] passages;
+    /**
+     * Author-created JavaScript associated with the story.
+     */
+    private String script;
+    /**
+     * Is the story currently selected by the user?
+     */
+    private boolean selected;
+    /**
+     * Should passages snap to a grid?
+     */
+    private boolean snapToGrid;
+    /**
+     * ID of the passage that the story begins at.
+     */
+    private String startPassage;
+    /**
+     * Name of the story format the story uses.
+     */
+    private String storyFormat;
+    /**
+     * Version of the story format that this story uses.
+     */
+    private String storyFormatVersion;
+    /**
+     * Author-created CSS associated with the story.
+     */
+    private String stylesheet;
+    /**
+     * Tags applied to the story.
+     */
+    private String[] tags;
+    /**
+     * Author-specified colors for passage tags.
+     */
+    private Map<String, String> tagColors;
+    /**
+     * Zoom level the story is displayed at.
+     */
+    private int zoom;
+    /**
+     * InterTwine Dev Tools under here.
+     */
 
-// // Constructor
-// public Story(String ifid, String id, Date lastUpdate, String name, Passage[]
-// passages, String script,
-// boolean selected, boolean snapToGrid, String startPassage, String
-// storyFormat, String storyFormatVersion,
-// String stylesheet, String[] tags, TagColors tagColors, int zoom, String
-// owner, String[] editors) {
-// this.ifid = ifid;
-// this.id = id;
-// this.lastUpdate = lastUpdate;
-// this.name = name;
-// this.passages = passages;
-// this.script = script;
-// this.selected = selected;
-// this.snapToGrid = snapToGrid;
-// this.startPassage = startPassage;
-// this.storyFormat = storyFormat;
-// this.storyFormatVersion = storyFormatVersion;
-// this.stylesheet = stylesheet;
-// this.tags = tags;
-// this.tagColors = tagColors;
-// this.zoom = zoom;
-// this.owner = owner;
-// this.editors = editors;
-// }
+    /**
+     * Owner of the story.
+     */
+    private String owner;
+    /**
+     * People who are allowed to edit the story.
+     */
+    private String[] editors;
 
-// public String getIfid() {
-// return ifid;
-// }
+    // Constructor
+    public Story(String ifid, String id, Date lastUpdate, String name, Passage[] passages,
+            String script,
+            boolean selected, boolean snapToGrid, String startPassage, String storyFormat, String storyFormatVersion,
+            String stylesheet, String[] tags, Map<String, String> tagColors, int zoom, String owner, String[] editors) {
+        this.ifid = ifid;
+        this.id = id;
+        this.lastUpdate = lastUpdate;
+        this.name = name;
+        this.passageIds = new ArrayList<ObjectId>();
+        this.passages = passages;
+        this.script = script;
+        this.selected = selected;
+        this.snapToGrid = snapToGrid;
+        this.startPassage = startPassage;
+        this.storyFormat = storyFormat;
+        this.storyFormatVersion = storyFormatVersion;
+        this.stylesheet = stylesheet;
+        this.tags = tags;
+        this.tagColors = tagColors;
+        this.zoom = zoom;
+        this.owner = owner;
+        this.editors = editors;
+        // populate passageIds function here!
+    }
 
-// public void setIfid(String ifid) {
-// this.ifid = ifid;
-// }
+    public String getIfid() {
+        return ifid;
+    }
 
-// public String getId() {
-// return id;
-// }
+    public void setIfid(String ifid) {
+        this.ifid = ifid;
+    }
 
-// public void setId(String id) {
-// this.id = id;
-// }
+    public String getId() {
+        return id;
+    }
 
-// public Date getLastUpdate() {
-// return lastUpdate;
-// }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-// public void setLastUpdate(Date lastUpdate) {
-// this.lastUpdate = lastUpdate;
-// }
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
 
-// public String getName() {
-// return name;
-// }
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
 
-// public void setName(String name) {
-// this.name = name;
-// }
+    public String getName() {
+        return name;
+    }
 
-// public Passage[] getPassages() {
-// return passages;
-// }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-// public void setPassages(Passage[] passages) {
-// this.passages = passages;
-// }
+    public List<ObjectId> getPassageIds() {
+        return passageIds;
+    }
 
-// public String getScript() {
-// return script;
-// }
+    public void setPassageId(List<ObjectId> passageIds) {
+        this.passageIds = passageIds;
+    }
 
-// public void setScript(String script) {
-// this.script = script;
-// }
+    public Passage[] getPassages() {
+        return passages;
+    }
 
-// public boolean isSelected() {
-// return selected;
-// }
+    public void setPassages(Passage[] passages) {
+        this.passages = passages;
+    }
 
-// public void setSelected(boolean selected) {
-// this.selected = selected;
-// }
+    public String getScript() {
+        return script;
+    }
 
-// public boolean isSnapToGrid() {
-// return snapToGrid;
-// }
+    public void setScript(String script) {
+        this.script = script;
+    }
 
-// public void setSnapToGrid(boolean snapToGrid) {
-// this.snapToGrid = snapToGrid;
-// }
+    public boolean isSelected() {
+        return selected;
+    }
 
-// public String getStartPassage() {
-// return startPassage;
-// }
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
-// public void setStartPassage(String startPassage) {
-// this.startPassage = startPassage;
-// }
+    public boolean isSnapToGrid() {
+        return snapToGrid;
+    }
 
-// public String getStoryFormat() {
-// return storyFormat;
-// }
+    public void setSnapToGrid(boolean snapToGrid) {
+        this.snapToGrid = snapToGrid;
+    }
 
-// public void setStoryFormat(String storyFormat) {
-// this.storyFormat = storyFormat;
-// }
+    public String getStartPassage() {
+        return startPassage;
+    }
 
-// public String getStoryFormatVersion() {
-// return storyFormatVersion;
-// }
+    public void setStartPassage(String startPassage) {
+        this.startPassage = startPassage;
+    }
 
-// public void setStoryFormatVersion(String storyFormatVersion) {
-// this.storyFormatVersion = storyFormatVersion;
-// }
+    public String getStoryFormat() {
+        return storyFormat;
+    }
 
-// public String getStylesheet() {
-// return stylesheet;
-// }
+    public void setStoryFormat(String storyFormat) {
+        this.storyFormat = storyFormat;
+    }
 
-// public void setStylesheet(String stylesheet) {
-// this.stylesheet = stylesheet;
-// }
+    public String getStoryFormatVersion() {
+        return storyFormatVersion;
+    }
 
-// public String[] getTags() {
-// return tags;
-// }
+    public void setStoryFormatVersion(String storyFormatVersion) {
+        this.storyFormatVersion = storyFormatVersion;
+    }
 
-// public void setTags(String[] tags) {
-// this.tags = tags;
-// }
+    public String getStylesheet() {
+        return stylesheet;
+    }
 
-// public TagColors getTagColors() {
-// return tagColors;
-// }
+    public void setStylesheet(String stylesheet) {
+        this.stylesheet = stylesheet;
+    }
 
-// public void setTagColors(TagColors tagColors) {
-// this.tagColors = tagColors;
-// }
+    public String[] getTags() {
+        return tags;
+    }
 
-// public int getZoom() {
-// return zoom;
-// }
+    public void setTags(String[] tags) {
+        this.tags = tags;
+    }
 
-// public void setZoom(int zoom) {
-// this.zoom = zoom;
-// }
+    public Map<String, String> getTagColors() {
+        return tagColors;
+    }
 
-// public String getOwner() {
-// return owner;
-// }
+    public void setTagColors(Map<String, String> tagColors) {
+        this.tagColors = tagColors;
+    }
 
-// public void setOwner(String owner) {
-// this.owner = owner;
-// }
+    public int getZoom() {
+        return zoom;
+    }
 
-// public String[] getEditors() {
-// return editors;
-// }
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
+    }
 
-// public void setEditors(String[] editors) {
-// this.editors = editors;
-// }
+    public String getOwner() {
+        return owner;
+    }
 
-// }
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String[] getEditors() {
+        return editors;
+    }
+
+    public void setEditors(String[] editors) {
+        this.editors = editors;
+    }
+
+    @Override
+    public <TDocument> BsonDocument toBsonDocument(Class<TDocument> document, CodecRegistry registry) {
+        BsonDocument bsonDocument = new BsonDocument();
+        bsonDocument.put("ifid", new BsonString(ifid));
+        bsonDocument.put("id", new BsonString(id));
+        bsonDocument.put("lastUpdate", new BsonDateTime(lastUpdate.getTime()));
+        bsonDocument.put("name", new BsonString(name));
+        BsonArray passageIdsArray = new BsonArray();
+        for (ObjectId passageId : passageIds) {
+            passageIdsArray.add(new BsonObjectId(passageId));
+        }
+        bsonDocument.put("passageIds", passageIdsArray);
+        BsonArray passagesArray = new BsonArray();
+        for (Passage passage : passages) {
+            passagesArray.add(passage.toBsonDocument());
+        }
+        bsonDocument.put("passages", passagesArray);
+        bsonDocument.put("script", new BsonString(script));
+        bsonDocument.put("selected", new BsonBoolean(selected));
+        bsonDocument.put("snapToGrid", new BsonBoolean(snapToGrid));
+        bsonDocument.put("startPassage", new BsonString(startPassage));
+        bsonDocument.put("storyFormat", new BsonString(storyFormat));
+        bsonDocument.put("storyFormatVersion", new BsonString(storyFormatVersion));
+        bsonDocument.put("stylesheet", new BsonString(stylesheet));
+        BsonArray tagsArray = new BsonArray();
+        for (String tag : tags) {
+            tagsArray.add(new BsonString(tag));
+        }
+        bsonDocument.put("tags", tagsArray);
+        BsonDocument tagColorsDocument = new BsonDocument();
+        for (String key : tagColors.keySet()) {
+            tagColorsDocument.put(key, new BsonString(tagColors.get(key)));
+        }
+        bsonDocument.put("tagColors", tagColorsDocument);
+        bsonDocument.put("zoom", new BsonInt32(zoom));
+        bsonDocument.put("owner", new BsonString(owner));
+        BsonArray editorsArray = new BsonArray();
+        for (String editor : editors) {
+            editorsArray.add(new BsonString(editor));
+        }
+        bsonDocument.put("editors", editorsArray);
+        return bsonDocument;
+    }
+}

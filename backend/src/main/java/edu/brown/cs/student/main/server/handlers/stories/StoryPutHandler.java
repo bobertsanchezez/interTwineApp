@@ -1,15 +1,23 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
+import org.bson.BsonDocument;
+import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.ReplaceOptions;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
+import edu.brown.cs.student.main.server.types.Story;
 import spark.Request;
 import spark.Response;
 
@@ -34,12 +42,48 @@ public class StoryPutHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        int size = request.queryParams().size();
-        if (size == 0) {
-            return serialize(handlerFailureResponse(null, null));
+        String id = request.params("id");
+        if (id == null) {
+            return serialize(
+                    handlerFailureResponse("error_bad_request",
+                            "story id <id> is a required query parameter (usage: PUT request to .../stories/<id>)"));
         }
+        String data = request.body();
 
-        return serialize(handlerSuccessResponse(null));
+        if (data == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
+        }
+        MongoDatabase database = mongoClient.getDatabase("InterTwine");
+        MongoCollection<Document> collection = database.getCollection("stories");
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<Story> adapter = moshi.adapter(Story.class);
+        Story story;
+        try {
+            story = adapter.fromJson(data);
+        } catch (JsonDataException | IOException e) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> could not be converted to Story format"));
+        }
+        if (story == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> was null after json adaptation"));
+        }
+        try {
+            BsonDocument bsonDocument = story.toBsonDocument();
+            Document filter = new Document("id", id);
+            Document document = Document.parse(bsonDocument.toJson());
+            ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
+            collection.replaceOne(filter, document, upsertOption);
+            return serialize(handlerSuccessResponse(document));
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString();
+            return serialize(handlerFailureResponse("error_datasource",
+                    "Given story could not updated: " + sStackTrace));
+        }
     }
 
 }

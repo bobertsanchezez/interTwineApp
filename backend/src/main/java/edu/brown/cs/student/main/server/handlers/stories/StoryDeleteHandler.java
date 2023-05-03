@@ -1,18 +1,17 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import spark.Request;
 import spark.Response;
-import spark.Route;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 /**
  * Handler class for the redlining API endpoint.
@@ -33,12 +32,32 @@ public class StoryDeleteHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        int size = request.queryParams().size();
-        if (size == 0) {
-            return serialize(handlerFailureResponse(null, null));
+        String id = request.params(":id");
+        if (id == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
+        } else if (id.length() == 0) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
         }
-
-        return serialize(handlerSuccessResponse(null));
+        try {
+            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoCollection<Document> collection = database.getCollection("stories");
+            Document toDelete = new Document("id", id);
+            DeleteResult res = collection.deleteOne(toDelete);
+            if (res.getDeletedCount() == 0) {
+                return serialize(handlerFailureResponse("error_datasource",
+                        "Delete failed: no document with id " + id + " contained in the database"));
+            }
+            return serialize(handlerSuccessResponse(id));
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString();
+            return serialize(handlerFailureResponse("error_datasource",
+                    "Given story could not be deleted from collection: " + sStackTrace));
+        }
     }
 
 }

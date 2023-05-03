@@ -1,9 +1,6 @@
 package edu.brown.cs.student.main.server.handlers.passages;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -18,13 +15,11 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import edu.brown.cs.student.main.server.types.Passage;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 /**
  * Handler class for the redlining API endpoint.
