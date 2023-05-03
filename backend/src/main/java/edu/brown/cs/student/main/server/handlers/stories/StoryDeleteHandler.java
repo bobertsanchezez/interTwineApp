@@ -32,31 +32,41 @@ public class StoryDeleteHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        String id = request.params(":id");
-        if (id == null) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
-        } else if (id.length() == 0) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
-        }
         try {
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
-            MongoCollection<Document> collection = database.getCollection("stories");
-            Document toDelete = new Document("id", id);
-            DeleteResult res = collection.deleteOne(toDelete);
-            if (res.getDeletedCount() == 0) {
-                return serialize(handlerFailureResponse("error_datasource",
-                        "Delete failed: no document with id " + id + " contained in the database"));
+
+            String id = request.params(":id");
+            if (id == null) {
+                return serialize(handlerFailureResponse("error_bad_request",
+                        "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
+            } else if (id.length() == 0) {
+                return serialize(handlerFailureResponse("error_bad_request",
+                        "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
             }
-            return serialize(handlerSuccessResponse(id));
+            try {
+                MongoDatabase database = mongoClient.getDatabase("InterTwine");
+                MongoCollection<Document> collection = database.getCollection("stories");
+                Document toDelete = new Document("id", id);
+                DeleteResult res = collection.deleteOne(toDelete);
+                if (res.getDeletedCount() == 0) {
+                    return serialize(handlerFailureResponse("error_datasource",
+                            "Delete failed: no document with id " + id + " contained in the database"));
+                }
+                return serialize(handlerSuccessResponse(id));
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString();
+                return serialize(handlerFailureResponse("error_datasource",
+                        "Given story could not be deleted from collection: " + sStackTrace));
+            }
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Given story could not be deleted from collection: " + sStackTrace));
+                    "Given story could not be inserted into collection: " + sStackTrace));
         }
     }
 
