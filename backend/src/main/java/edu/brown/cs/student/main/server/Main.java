@@ -8,6 +8,7 @@ import edu.brown.cs.student.main.server.handlers.passages.PassageDeleteHandler;
 import edu.brown.cs.student.main.server.handlers.passages.PassageGetHandler;
 import edu.brown.cs.student.main.server.handlers.passages.PassagePostHandler;
 import edu.brown.cs.student.main.server.handlers.passages.PassagePutHandler;
+import edu.brown.cs.student.main.server.handlers.stories.LibraryLoadHandler;
 import edu.brown.cs.student.main.server.handlers.stories.StoryDeleteHandler;
 import edu.brown.cs.student.main.server.handlers.stories.StoryGetHandler;
 import edu.brown.cs.student.main.server.handlers.stories.StoryPostHandler;
@@ -33,6 +34,7 @@ public class Main {
 
         // Setting up HTTP endpoints for stories, passages
         // /stories GET, POST, PUT, DELETE endpoints
+        Spark.get("/libraryload/:id", new LibraryLoadHandler(mc));
         Spark.get("/stories", new StoryGetHandler(mc));
         Spark.post("/stories", new StoryPostHandler(mc));
         Spark.put("/stories/:id", new StoryPutHandler(mc));
