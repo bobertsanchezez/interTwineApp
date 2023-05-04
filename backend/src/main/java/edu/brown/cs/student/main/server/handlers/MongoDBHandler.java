@@ -1,6 +1,7 @@
 package edu.brown.cs.student.main.server.handlers;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import com.mongodb.client.MongoClient;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter;
 
 import spark.Request;
 import spark.Response;
@@ -69,7 +71,9 @@ public class MongoDBHandler implements Route {
      * @return string representation of the Map in JSON format
      */
     protected String serialize(Map<String, Object> response) {
-        Moshi moshi = new Moshi.Builder().build();
+        Moshi moshi = new Moshi.Builder()
+                .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
+                .build();
         Type mapOfJSONResponse = Types.newParameterizedType(Map.class,
                 String.class,
                 Object.class);

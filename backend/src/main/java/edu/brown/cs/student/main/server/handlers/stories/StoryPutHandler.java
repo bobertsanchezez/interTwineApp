@@ -3,6 +3,7 @@ package edu.brown.cs.student.main.server.handlers.stories;
 import java.io.IOException;
 
 import java.io.StringWriter;
+import java.util.Date;
 import java.io.PrintWriter;
 
 import org.bson.BsonDocument;
@@ -15,6 +16,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import edu.brown.cs.student.main.server.types.Story;
@@ -25,8 +27,6 @@ import spark.Response;
  * Handler class for the redlining API endpoint.
  */
 public class StoryPutHandler extends MongoDBHandler {
-
-    MongoClient mongoClient;
 
     public StoryPutHandler(MongoClient mongoClient) {
         super(mongoClient);
@@ -50,7 +50,9 @@ public class StoryPutHandler extends MongoDBHandler {
                         handlerFailureResponse("error_bad_request",
                                 "story id <id> is a required query parameter (usage: PUT request to .../stories/<id>)"));
             }
+            // TODO remove
             String data = request.body();
+            System.out.println(data);
 
             if (data == null) {
                 return serialize(handlerFailureResponse("error_bad_request",
@@ -58,7 +60,9 @@ public class StoryPutHandler extends MongoDBHandler {
             }
             MongoDatabase database = mongoClient.getDatabase("InterTwine");
             MongoCollection<Document> collection = database.getCollection("stories");
-            Moshi moshi = new Moshi.Builder().build();
+            Moshi moshi = new Moshi.Builder()
+                    .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
+                    .build();
             JsonAdapter<Story> adapter = moshi.adapter(Story.class);
             Story story;
             try {

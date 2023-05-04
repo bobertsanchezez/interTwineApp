@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.bson.BsonArray;
 import org.bson.BsonBoolean;
@@ -274,9 +273,10 @@ public class Story implements Bson {
         bsonDocument.put("lastUpdate", new BsonDateTime(lastUpdate.getTime()));
         bsonDocument.put("name", new BsonString(name));
         BsonArray passageIdsArray = new BsonArray();
-        for (ObjectId passageId : passageIds) {
-            passageIdsArray.add(new BsonObjectId(passageId));
-        }
+        // TODO UNCOMMENT BELOW WHEN IMPLEMENTING CROSSLINKING (causes error)
+        // for (ObjectId passageId : passageIds) {
+        // passageIdsArray.add(new BsonObjectId(passageId));
+        // }
         bsonDocument.put("passageIds", passageIdsArray);
         BsonArray passagesArray = new BsonArray();
         for (Passage passage : passages) {

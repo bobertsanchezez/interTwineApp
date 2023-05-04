@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 
 import org.bson.BsonDocument;
 import org.bson.Document;
+import java.util.Date;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -14,6 +15,7 @@ import com.mongodb.client.MongoDatabase;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import edu.brown.cs.student.main.server.types.Story;
@@ -47,12 +49,16 @@ public class StoryPostHandler extends MongoDBHandler {
             } else {
                 data = request.queryParams("data");
             }
+            // TODO remove
+            System.out.println(data);
 
             if (data == null) {
                 return serialize(handlerFailureResponse("error_bad_request",
                         "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
             }
-            Moshi moshi = new Moshi.Builder().build();
+            Moshi moshi = new Moshi.Builder()
+                    .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
+                    .build();
             JsonAdapter<Story> adapter = moshi.adapter(Story.class);
             Story story;
             try {
