@@ -17,6 +17,8 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 public class Story implements Bson {
+
+    private ObjectId _id;
     /**
      * IFID of the story. An IFID should stay stable when a story is imported or
      * exported.
@@ -96,10 +98,11 @@ public class Story implements Bson {
     private String[] editors;
 
     // Constructor
-    public Story(String ifid, String id, Date lastUpdate, String name, Passage[] passages,
+    public Story(ObjectId _id, String ifid, String id, Date lastUpdate, String name, Passage[] passages,
             String script,
             boolean selected, boolean snapToGrid, String startPassage, String storyFormat, String storyFormatVersion,
             String stylesheet, String[] tags, Map<String, String> tagColors, int zoom, String owner, String[] editors) {
+        this._id = _id;
         this.ifid = ifid;
         this.id = id;
         this.lastUpdate = lastUpdate;
@@ -119,6 +122,16 @@ public class Story implements Bson {
         this.owner = owner;
         this.editors = editors;
         // populate passageIds function here!
+    }
+
+    // Getter method for the _id field
+    public ObjectId get_id() {
+        return _id;
+    }
+
+    // Setter method for the _id field
+    public void set_id(ObjectId _id) {
+        this._id = _id;
     }
 
     public String getIfid() {

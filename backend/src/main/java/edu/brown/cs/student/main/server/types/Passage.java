@@ -28,9 +28,10 @@ public class Passage implements Bson {
     private boolean claimed;
     private String user;
 
-    public Passage(int height, boolean highlighted, String id, int left, String name, boolean selected,
+    public Passage(ObjectId _id, int height, boolean highlighted, String id, int left, String name, boolean selected,
             String story, List<String> tags, String text, int top, int width, boolean claimed, String user) {
 
+        this._id = _id;
         this.height = height;
         this.highlighted = highlighted;
         this.id = id;
@@ -44,6 +45,16 @@ public class Passage implements Bson {
         this.width = width;
         this.claimed = claimed;
         this.user = user;
+    }
+
+    // Getter method for the _id field
+    public ObjectId get_id() {
+        return _id;
+    }
+
+    // Setter method for the _id field
+    public void set_id(ObjectId _id) {
+        this._id = _id;
     }
 
     public int getHeight() {
