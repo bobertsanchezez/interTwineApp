@@ -52,16 +52,19 @@ public class PassageDeleteHandler extends MongoDBHandler {
             MongoCollection<Document> psgCollection = database.getCollection("passages");
             Document psgDoc = new Document("id", id);
             DeleteResult res = psgCollection.deleteOne(psgDoc);
-            MongoCollection<Document> storiesCollection = database.getCollection("stories");
-            Document story = storiesCollection
-                    .find(Filters.elemMatch("passages", Filters.eq("_id", new ObjectId("passageId")))).first();
-            List<Document> updatedPassages = story.getList("passages", Document.class).stream()
-                    .filter(p -> !p.getObjectId("_id").equals(psgDoc.getObjectId(
-                            "_id")))
-                    .collect(Collectors.toList());
-            Document updatedStory = new Document("passages", updatedPassages);
-            storiesCollection.updateOne(Filters.eq("_id", story.getObjectId("_id")),
-                    Updates.set("passages", updatedStory.getList("passages", Document.class)));
+            // MongoCollection<Document> storiesCollection =
+            // database.getCollection("stories");
+            // Document story = storiesCollection
+            // .find(Filters.elemMatch("passages", Filters.eq("_id", new
+            // ObjectId("passageId")))).first();
+            // List<Document> updatedPassages = story.getList("passages",
+            // Document.class).stream()
+            // .filter(p -> !p.getObjectId("_id").equals(psgDoc.getObjectId(
+            // "_id")))
+            // .collect(Collectors.toList());
+            // Document updatedStory = new Document("passages", updatedPassages);
+            // storiesCollection.updateOne(Filters.eq("_id", story.getObjectId("_id")),
+            // Updates.set("passages", updatedStory.getList("passages", Document.class)));
             if (res.getDeletedCount() == 0) {
                 return serialize(handlerFailureResponse("error_datasource",
                         "Delete failed: no document with id " + id + " contained in the database"));

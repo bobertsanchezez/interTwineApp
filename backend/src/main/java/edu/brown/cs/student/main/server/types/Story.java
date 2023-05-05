@@ -98,11 +98,11 @@ public class Story implements Bson {
     private String[] editors;
 
     // Constructor
-    public Story(ObjectId _id, String ifid, String id, Date lastUpdate, String name, Passage[] passages,
+    public Story(String ifid, String id, Date lastUpdate, String name, Passage[] passages,
             String script,
             boolean selected, boolean snapToGrid, String startPassage, String storyFormat, String storyFormatVersion,
             String stylesheet, String[] tags, Map<String, String> tagColors, int zoom, String owner, String[] editors) {
-        this._id = _id;
+        this._id = new ObjectId();
         this.ifid = ifid;
         this.id = id;
         this.lastUpdate = lastUpdate;

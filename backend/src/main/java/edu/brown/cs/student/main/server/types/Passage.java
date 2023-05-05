@@ -28,10 +28,9 @@ public class Passage implements Bson {
     private boolean claimed;
     private String user;
 
-    public Passage(ObjectId _id, int height, boolean highlighted, String id, int left, String name, boolean selected,
+    public Passage(int height, boolean highlighted, String id, int left, String name, boolean selected,
             String story, List<String> tags, String text, int top, int width, boolean claimed, String user) {
-
-        this._id = _id;
+        this._id = new ObjectId();
         this.height = height;
         this.highlighted = highlighted;
         this.id = id;

@@ -84,15 +84,22 @@ public class PassagePutHandler extends MongoDBHandler {
             psgCollection.replaceOne(filter, psgDoc, upsertOption);
             // update story containing passage
             // 1. find story containing passage
-            Document story = storyCollection
-                    .find(Filters.elemMatch("passages", Filters.eq("_id", psgDoc.getObjectId("_id")))).first();
-            // 2. make a doc containing updated passages list for story
-            Document updatedStoryPassages = new Document("passages", story.getList("passages", Document.class).stream()
-                    .map(p -> p.getObjectId("_id").equals(psgDoc.getObjectId("_id")) ? psgDoc : p)
-                    .collect(Collectors.toList()));
-            // 3. replace current passages list with updated passages list
-            storyCollection.updateOne(Filters.eq("_id", story.getObjectId("_id")),
-                    Updates.set("passages", updatedStoryPassages.getList("passages", Document.class)));
+            // Document story = storyCollection
+            // .find(Filters.elemMatch("passages", Filters.eq("_id",
+            // psgDoc.getObjectId("_id")))).first();
+
+            // System.out.println("found story:" + story.toJson());
+            // // 2. make a doc containing updated passages list for story
+            // System.out.println("passage stuff:" + psgDoc.toJson());
+            // Document updatedStoryPassages = new Document("passages",
+            // story.getList("passages", Document.class).stream()
+            // .map(p -> p.getObjectId("_id").equals(psgDoc.getObjectId("_id")) ? psgDoc :
+            // p)
+            // .collect(Collectors.toList()));
+            // // 3. replace current passages list with updated passages list
+            // storyCollection.updateOne(Filters.eq("_id", story.getObjectId("_id")),
+            // Updates.set("passages", updatedStoryPassages.getList("passages",
+            // Document.class)));
             return serialize(handlerSuccessResponse(psgDoc));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
