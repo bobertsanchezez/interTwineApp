@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 
 import org.bson.BsonDocument;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -60,46 +61,36 @@ public class PassagePutHandler extends MongoDBHandler {
         MongoDatabase database = mongoClient.getDatabase("InterTwine");
         MongoCollection<Document> psgCollection = database.getCollection("passages");
         MongoCollection<Document> storyCollection = database.getCollection("stories");
-        Moshi moshi = new Moshi.Builder()
-                .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
-                .build();
-        JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);
-        Passage passage;
-        try {
-            passage = adapter.fromJson(data);
-        } catch (JsonDataException | IOException e) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> could not be converted to Passage format"));
-        }
-        if (passage == null) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> was null after json adaptation"));
-        }
         try {
             // update (or create) passage
-            BsonDocument psgBsonDoc = passage.toBsonDocument();
-            Document filter = new Document("id", id);
-            Document psgDoc = Document.parse(psgBsonDoc.toJson());
+            Document psgDoc = Document.parse(data);
+            Document psgFilter = new Document("id", id);
             ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
-            psgCollection.replaceOne(filter, psgDoc, upsertOption);
-            // update story containing passage
+            psgCollection.replaceOne(psgFilter, psgDoc, upsertOption);
+            // we want to update the story containing the passage
             // 1. find story containing passage
-            // Document story = storyCollection
-            // .find(Filters.elemMatch("passages", Filters.eq("_id",
-            // psgDoc.getObjectId("_id")))).first();
-
-            // System.out.println("found story:" + story.toJson());
-            // // 2. make a doc containing updated passages list for story
-            // System.out.println("passage stuff:" + psgDoc.toJson());
-            // Document updatedStoryPassages = new Document("passages",
-            // story.getList("passages", Document.class).stream()
-            // .map(p -> p.getObjectId("_id").equals(psgDoc.getObjectId("_id")) ? psgDoc :
-            // p)
-            // .collect(Collectors.toList()));
-            // // 3. replace current passages list with updated passages list
-            // storyCollection.updateOne(Filters.eq("_id", story.getObjectId("_id")),
-            // Updates.set("passages", updatedStoryPassages.getList("passages",
-            // Document.class)));
+            Document story = storyCollection
+                    .find(Filters.elemMatch("passages", Filters.eq("id",
+                            psgDoc.get("id"))))
+                    .first();
+            Document updatedStoryPassages;
+            if (story == null) {
+                // 2a. no story contains passage yet; find story and add passage
+                Document storyFilter = new Document("id", psgDoc.get("story"));
+                story = storyCollection.find(storyFilter).first();
+                story.getList("passages", Document.class).add(psgDoc);
+                updatedStoryPassages = new Document("passages", story.getList("passages", Document.class));
+            } else {
+                // 2b. story contains passage; update passage in story
+                updatedStoryPassages = new Document("passages",
+                        story.getList("passages", Document.class).stream()
+                                .map(p -> p.get("id").equals(psgDoc.get("id")) ? psgDoc : p)
+                                .collect(Collectors.toList()));
+            }
+            // 3. replace current passages list with updated passages list
+            storyCollection.updateOne(Filters.eq("id", story.get("id")),
+                    Updates.set("passages", updatedStoryPassages.getList("passages",
+                            Document.class)));
             return serialize(handlerSuccessResponse(psgDoc));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
