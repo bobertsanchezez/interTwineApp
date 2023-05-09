@@ -31,20 +31,21 @@ public class Main {
 
         // set up one connection to MongoDB, shared with all servers
         MongoClient mc = MongoClientConnection.startConnection();
+        String databaseName = "InterTwine";
 
         /// Setting up HTTP endpoints for stories, passages
         // /stories GET, POST, PUT, DELETE endpoints
-        Spark.get("/libraryload/:id", new LibraryLoadHandler(mc));
-        Spark.get("/stories", new StoryGetHandler(mc));
-        Spark.post("/stories", new StoryPostHandler(mc));
-        Spark.put("/stories/:id", new StoryPutHandler(mc));
-        Spark.delete("/stories/:id", new StoryDeleteHandler(mc));
+        Spark.get("/libraryload/:id", new LibraryLoadHandler(mc, databaseName));
+        Spark.get("/stories", new StoryGetHandler(mc, databaseName));
+        Spark.post("/stories", new StoryPostHandler(mc, databaseName));
+        Spark.put("/stories/:id", new StoryPutHandler(mc, databaseName));
+        Spark.delete("/stories/:id", new StoryDeleteHandler(mc, databaseName));
 
         // /passages GET, POST, PUT, DELETE endpoints
-        Spark.get("/passages", new PassageGetHandler(mc));
-        Spark.post("/passages", new PassagePostHandler(mc));
-        Spark.put("/passages/:id", new PassagePutHandler(mc));
-        Spark.delete("/passages/:id", new PassageDeleteHandler(mc));
+        Spark.get("/passages", new PassageGetHandler(mc, databaseName));
+        Spark.post("/passages", new PassagePostHandler(mc, databaseName));
+        Spark.put("/passages/:id", new PassagePutHandler(mc, databaseName));
+        Spark.delete("/passages/:id", new PassageDeleteHandler(mc, databaseName));
 
         // Options setup
         Spark.options("/*", (request, response) -> {

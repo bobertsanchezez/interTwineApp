@@ -18,8 +18,8 @@ import java.io.PrintWriter;
  */
 public class StoryDeleteHandler extends MongoDBHandler {
 
-    public StoryDeleteHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public StoryDeleteHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -42,7 +42,7 @@ public class StoryDeleteHandler extends MongoDBHandler {
                     "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
         }
         try {
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection("stories");
             Document toDelete = new Document("id", id);
             DeleteResult res = collection.deleteOne(toDelete);

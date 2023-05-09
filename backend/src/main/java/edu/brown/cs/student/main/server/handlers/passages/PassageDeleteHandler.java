@@ -22,8 +22,8 @@ import spark.Response;
  */
 public class PassageDeleteHandler extends MongoDBHandler {
 
-    public PassageDeleteHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public PassageDeleteHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -45,7 +45,7 @@ public class PassageDeleteHandler extends MongoDBHandler {
                     "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/passages/<id>)"));
         }
         try {
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> psgCollection = database.getCollection("passages");
             MongoCollection<Document> storyCollection = database.getCollection("stories");
             // delete the passage

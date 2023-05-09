@@ -20,8 +20,8 @@ import spark.Response;
  */
 public class PassagePutHandler extends MongoDBHandler {
 
-    public PassagePutHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public PassagePutHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -45,7 +45,7 @@ public class PassagePutHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
         }
-        MongoDatabase database = mongoClient.getDatabase("InterTwine");
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> psgCollection = database.getCollection("passages");
         MongoCollection<Document> storyCollection = database.getCollection("stories");
         // update (or create) passage

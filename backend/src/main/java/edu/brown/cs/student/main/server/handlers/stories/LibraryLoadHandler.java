@@ -20,8 +20,8 @@ import spark.Response;
  * Handler class for a bulk GET request of a user's stories.
  */
 public class LibraryLoadHandler extends MongoDBHandler {
-    public LibraryLoadHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public LibraryLoadHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -42,7 +42,7 @@ public class LibraryLoadHandler extends MongoDBHandler {
                         handlerFailureResponse("error_bad_request",
                                 "story id <id> is a required query parameter (usage: GET request to .../stories?id=12345)"));
             }
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection("stories");
             // TODO distinguish owned vs shared stories in response
             ArrayList<Document> userStories = new ArrayList<Document>();

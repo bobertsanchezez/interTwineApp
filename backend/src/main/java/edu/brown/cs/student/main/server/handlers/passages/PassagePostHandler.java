@@ -24,8 +24,8 @@ import spark.Response;
  */
 public class PassagePostHandler extends MongoDBHandler {
 
-    public PassagePostHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public PassagePostHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -63,7 +63,7 @@ public class PassagePostHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> was null after json adaptation"));
         }
-        MongoDatabase database = mongoClient.getDatabase("InterTwine");
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> collection = database.getCollection("passages");
         BsonDocument bsonDocument = passage.toBsonDocument();
         Document newDoc = Document.parse(bsonDocument.toJson());

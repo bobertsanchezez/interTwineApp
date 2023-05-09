@@ -28,8 +28,8 @@ import spark.Response;
  */
 public class StoryPostHandler extends MongoDBHandler {
 
-    public StoryPostHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public StoryPostHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -69,7 +69,7 @@ public class StoryPostHandler extends MongoDBHandler {
                     "data payload <data> was null after json adaptation"));
         }
         try {
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection("stories");
 
             BsonDocument bsonDocument = story.toBsonDocument();

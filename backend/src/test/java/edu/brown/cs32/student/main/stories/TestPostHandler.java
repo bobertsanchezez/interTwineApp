@@ -1,4 +1,4 @@
-package edu.brown.cs32.student.main;
+package edu.brown.cs32.student.main.stories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,7 +8,7 @@ import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.MongoClientConnection;
 import edu.brown.cs.student.main.server.handlers.passages.PassagePostHandler;
-import edu.brown.cs.student.main.server.handlers.passages.PassagePutHandler;
+import edu.brown.cs32.student.main.TestUtil;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -27,7 +27,7 @@ import spark.Spark;
 
 import com.mongodb.client.MongoClient;
 
-public class TestPutHandler {
+public class TestPostHandler {
   @BeforeAll
   public static void setup_before_everything() {
     Spark.port(0);
@@ -43,7 +43,7 @@ public class TestPutHandler {
   public void setup() {
     // Server server = new Server();
     MongoClient mc = MongoClientConnection.startConnection();
-    Spark.get("put", new PassagePutHandler(mc));
+    Spark.get("post", new PassagePostHandler(mc, TestUtil.databaseName));
     Spark.init();
     Spark.awaitInitialization();
   }
@@ -51,7 +51,7 @@ public class TestPutHandler {
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints
-    Spark.unmap("/put");
+    Spark.unmap("/post");
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
@@ -79,13 +79,13 @@ public class TestPutHandler {
 
   @Test
   public void testCorrect() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("put?id=1");
-    assertEquals(200, clientConnection.getResponseCode());    
+    HttpURLConnection clientConnection = tryRequest("post?data={id:1}");
+    assertEquals(200, clientConnection.getResponseCode());
   }
 
   @Test
   public void testNoData() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("put");
-    assertEquals(400, clientConnection.getResponseCode());    
+    HttpURLConnection clientConnection = tryRequest("post");
+    assertEquals(400, clientConnection.getResponseCode());
   }
 }

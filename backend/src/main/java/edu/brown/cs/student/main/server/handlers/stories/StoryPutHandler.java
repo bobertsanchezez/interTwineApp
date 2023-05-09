@@ -19,8 +19,8 @@ import spark.Response;
  */
 public class StoryPutHandler extends MongoDBHandler {
 
-    public StoryPutHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public StoryPutHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
@@ -44,7 +44,7 @@ public class StoryPutHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
         }
-        MongoDatabase database = mongoClient.getDatabase("InterTwine");
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> collection = database.getCollection("stories");
         try {
             Document filter = new Document("id", id);

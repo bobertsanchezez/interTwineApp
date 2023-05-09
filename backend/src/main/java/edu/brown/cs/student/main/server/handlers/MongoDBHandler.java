@@ -20,14 +20,16 @@ import spark.Route;
  */
 public class MongoDBHandler implements Route {
     protected MongoClient mongoClient;
+    protected String databaseName;
 
     /**
      * Constructor for a handler that connects to MongoDB.
      * 
      * @param mongoClient the MongoDB connection
      */
-    public MongoDBHandler(MongoClient mongoClient) {
+    public MongoDBHandler(MongoClient mongoClient, String databaseName) {
         this.mongoClient = mongoClient;
+        this.databaseName = databaseName;
     }
 
     /**
