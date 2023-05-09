@@ -14,6 +14,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.UpdateResult;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
@@ -81,7 +82,11 @@ public class StoryPutHandler extends MongoDBHandler {
                 Document filter = new Document("id", id);
                 Document storyDoc = Document.parse(data);
                 ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
-                collection.replaceOne(filter, storyDoc, upsertOption);
+                UpdateResult res = collection.replaceOne(filter, storyDoc, upsertOption);
+                System.out.println("STORY PUT PRINTS:");
+                System.out.println("raw data:" + data);
+                System.out.println("data as doc:" + storyDoc.toString());
+                System.out.println("update result:" + res.toString());
                 return serialize(handlerSuccessResponse(storyDoc));
             } catch (Exception e) {
                 StringWriter sw = new StringWriter();
@@ -89,7 +94,7 @@ public class StoryPutHandler extends MongoDBHandler {
                 e.printStackTrace(pw);
                 String sStackTrace = sw.toString();
                 return serialize(handlerFailureResponse("error_datasource",
-                        "Given story could not updated: " + sStackTrace));
+                        "Given story could not be updated: " + sStackTrace));
             }
         } catch (Exception e) {
             StringWriter sw = new StringWriter();

@@ -17,6 +17,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.UpdateResult;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
@@ -53,7 +54,6 @@ public class PassagePutHandler extends MongoDBHandler {
                             "passage id <id> is a required query parameter (usage: PUT request to .../passages/<id>)"));
         }
         String data = request.body();
-
         if (data == null) {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
@@ -66,7 +66,7 @@ public class PassagePutHandler extends MongoDBHandler {
             Document psgDoc = Document.parse(data);
             Document psgFilter = new Document("id", id);
             ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
-            psgCollection.replaceOne(psgFilter, psgDoc, upsertOption);
+            UpdateResult res = psgCollection.replaceOne(psgFilter, psgDoc, upsertOption);
             // we want to update the story containing the passage
             // 1. find story containing passage
             Document story = storyCollection
@@ -76,17 +76,30 @@ public class PassagePutHandler extends MongoDBHandler {
             Document updatedStoryPassages;
             if (story == null) {
                 // 2a. no story contains passage yet; find story and add passage
+                System.out.println("2a");
                 Document storyFilter = new Document("id", psgDoc.get("story"));
                 story = storyCollection.find(storyFilter).first();
                 story.getList("passages", Document.class).add(psgDoc);
                 updatedStoryPassages = new Document("passages", story.getList("passages", Document.class));
             } else {
                 // 2b. story contains passage; update passage in story
+                System.out.println("2b");
                 updatedStoryPassages = new Document("passages",
                         story.getList("passages", Document.class).stream()
                                 .map(p -> p.get("id").equals(psgDoc.get("id")) ? psgDoc : p)
                                 .collect(Collectors.toList()));
             }
+            // TODO remove printlns:
+
+            System.out.println("PASSAGE PUT PRINTS:");
+            System.out.println("psgput raw data:" + data);
+            System.out.println();
+            System.out.println("psgput data as doc:" + psgDoc.toString());
+            System.out.println();
+            System.out.println("update result:" + res.toString());
+            System.out.println();
+            System.out.println("found story:" + story.toString());
+            System.out.println();
             // 3. replace current passages list with updated passages list
             storyCollection.updateOne(Filters.eq("id", story.get("id")),
                     Updates.set("passages", updatedStoryPassages.getList("passages",
@@ -98,7 +111,7 @@ public class PassagePutHandler extends MongoDBHandler {
             e.printStackTrace(pw);
             String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Given passage could not updated: " + sStackTrace));
+                    "Given passage could not be updated: " + sStackTrace));
         }
 
     }

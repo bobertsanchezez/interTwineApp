@@ -72,8 +72,18 @@ public class PassagePostHandler extends MongoDBHandler {
             Document newDoc = Document.parse(bsonDocument.toJson());
             Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
                     .first();
+
+            System.out.println("PASSAGE POST PRINTS:");
+            System.out.println();
+            System.out.println("psgpost raw data:" + data);
+            System.out.println();
+            System.out.println("psgpost data as doc:" + newDoc.toString());
+            System.out.println();
+
             if (maybeExistsDoc != null) {
                 // doc already exists in database
+                System.out.println("found passage that already exists:" + maybeExistsDoc.toString());
+                System.out.println();
                 return serialize(handlerSuccessResponse(maybeExistsDoc));
             } else {
                 // doc doesn't exist; post it
