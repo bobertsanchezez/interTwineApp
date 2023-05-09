@@ -24,7 +24,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for POST requests to the stories collection.
  */
 public class StoryPostHandler extends MongoDBHandler {
 
@@ -33,7 +33,7 @@ public class StoryPostHandler extends MongoDBHandler {
     }
 
     /**
-     * 
+     * Handles POST requests to the stories collection, involving ...
      *
      * @param request  the request to handle
      * @param response use to modify properties of the response
@@ -42,64 +42,49 @@ public class StoryPostHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        String data;
+        if (request.body().length() != 0) {
+            data = request.body();
+        } else {
+            data = request.queryParams("data");
+        }
+
+        if (data == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
+        }
+        Moshi moshi = new Moshi.Builder()
+                .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
+                .build();
+        JsonAdapter<Story> adapter = moshi.adapter(Story.class);
+        Story story;
         try {
+            story = adapter.fromJson(data);
+        } catch (JsonDataException | IOException e) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> could not be converted to Story format"));
+        }
+        if (story == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> was null after json adaptation"));
+        }
+        try {
+            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoCollection<Document> collection = database.getCollection("stories");
 
-            String data;
-            if (request.body().length() != 0) {
-                data = request.body();
+            BsonDocument bsonDocument = story.toBsonDocument();
+            Document newDoc = Document.parse(bsonDocument.toJson());
+            Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
+                    .first();
+            if (maybeExistsDoc != null) {
+                // doc already exists in database
+                return serialize(handlerSuccessResponse(maybeExistsDoc));
             } else {
-                data = request.queryParams("data");
-            }
-
-            if (data == null) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
-            }
-            Moshi moshi = new Moshi.Builder()
-                    .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
-                    .build();
-            JsonAdapter<Story> adapter = moshi.adapter(Story.class);
-            Story story;
-            try {
-                story = adapter.fromJson(data);
-            } catch (JsonDataException | IOException e) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "data payload <data> could not be converted to Story format"));
-            }
-            if (story == null) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "data payload <data> was null after json adaptation"));
-            }
-            try {
-                MongoDatabase database = mongoClient.getDatabase("InterTwine");
-                MongoCollection<Document> collection = database.getCollection("stories");
-                BsonDocument bsonDocument = story.toBsonDocument();
-                Document newDoc = Document.parse(bsonDocument.toJson());
-                Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
-                        .first();
-                System.out.println("STORY POST PRINTS:");
-                System.out.println("raw data:" + data);
-                System.out.println("data as doc:" + newDoc.toString());
-                if (maybeExistsDoc != null) {
-                    // doc already exists in database
-                    System.out.println("found passage that already exists:" + maybeExistsDoc.toString());
-                    return serialize(handlerSuccessResponse(maybeExistsDoc));
-                } else {
-                    // doc doesn't exist; post it
-                    System.out.println("inserting newDoc");
-                    collection.insertOne(newDoc);
-                    return serialize(handlerSuccessResponse(newDoc));
-                }
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                String sStackTrace = sw.toString();
-                return serialize(handlerFailureResponse("error_datasource",
-                        "Given story could not be inserted into collection: " + sStackTrace));
+                // doc doesn't exist; post it
+                collection.insertOne(newDoc);
+                return serialize(handlerSuccessResponse(newDoc));
             }
         } catch (Exception e) {
-            // TODO delete this
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);

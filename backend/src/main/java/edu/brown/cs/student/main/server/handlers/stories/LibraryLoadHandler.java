@@ -1,7 +1,5 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
-import static com.mongodb.client.model.Filters.eq;
-
 import org.bson.Document;
 
 import java.io.StringWriter;
@@ -18,13 +16,16 @@ import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Handler class for a bulk GET request of a user's stories.
+ */
 public class LibraryLoadHandler extends MongoDBHandler {
     public LibraryLoadHandler(MongoClient mongoClient) {
         super(mongoClient);
     }
 
     /**
-     *
+     * Handles library load requests, involving
      *
      * @param request  the request to handle
      * @param response use to modify properties of the response

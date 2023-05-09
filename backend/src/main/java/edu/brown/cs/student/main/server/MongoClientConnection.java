@@ -33,7 +33,7 @@ public class MongoClientConnection {
                                 .serverApi(serverApi)
                                 .codecRegistry(codecRegistry)
                                 .build();
-                // Create a new client and connect to MongoDB
+                // create a new client and connect to MongoDB
                 MongoClient mongoClient = MongoClients.create(settings);
                 return mongoClient;
         }

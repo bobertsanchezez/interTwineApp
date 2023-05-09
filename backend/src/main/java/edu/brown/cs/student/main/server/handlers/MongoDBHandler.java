@@ -15,19 +15,28 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+/**
+ * A generalized handler that uses a connection to a MongoDB database.
+ */
 public class MongoDBHandler implements Route {
     protected MongoClient mongoClient;
 
+    /**
+     * Constructor for a handler that connects to MongoDB.
+     * 
+     * @param mongoClient the MongoDB connection
+     */
     public MongoDBHandler(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
     }
 
     /**
-     * 
+     * A general handler method that should be overridden by extending classes.
+     * Returns null handler responses.
      *
      * @param request  the request to handle
      * @param response use to modify properties of the response
-     * @return
+     * @return null handler responses
      * @throws Exception (this is a required part of the interface)
      */
     @Override
@@ -42,7 +51,7 @@ public class MongoDBHandler implements Route {
 
     /**
      * Returns a Map containing a success response to be converted to JSON.
-     *
+     * 
      * @return a Map<String,Object> containing response fields
      */
     protected Map<String, Object> handlerSuccessResponse(Object data) {
@@ -67,7 +76,8 @@ public class MongoDBHandler implements Route {
     /**
      * Serializes the given Map<String, Object> into JSON to be returned to a
      * requesting user.
-     *
+     * Utilizes a Moshi adapter capable of adapting Dates.
+     * 
      * @return string representation of the Map in JSON format
      */
     protected String serialize(Map<String, Object> response) {

@@ -14,7 +14,7 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for DELETE requests to the stories collection.
  */
 public class StoryDeleteHandler extends MongoDBHandler {
 
@@ -23,7 +23,7 @@ public class StoryDeleteHandler extends MongoDBHandler {
     }
 
     /**
-     * 
+     * Handles DELETE requests to the stories collection, involving
      *
      * @param request  the request to handle
      * @param response use to modify properties of the response
@@ -32,42 +32,38 @@ public class StoryDeleteHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        try {
 
-            String id = request.params(":id");
-            if (id == null) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
-            } else if (id.length() == 0) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
-            }
-            try {
-                MongoDatabase database = mongoClient.getDatabase("InterTwine");
-                MongoCollection<Document> collection = database.getCollection("stories");
-                Document toDelete = new Document("id", id);
-                DeleteResult res = collection.deleteOne(toDelete);
-                if (res.getDeletedCount() == 0) {
-                    return serialize(handlerFailureResponse("error_datasource",
-                            "Delete failed: no document with id " + id + " contained in the database"));
-                }
-                return serialize(handlerSuccessResponse(id));
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                String sStackTrace = sw.toString();
+        String id = request.params(":id");
+        if (id == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
+        } else if (id.length() == 0) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "required parameter <id> was not supplied (usage: DELETE request to localhost:3232/stories/<id>)"));
+        }
+        try {
+            MongoDatabase database = mongoClient.getDatabase("InterTwine");
+            MongoCollection<Document> collection = database.getCollection("stories");
+            Document toDelete = new Document("id", id);
+            DeleteResult res = collection.deleteOne(toDelete);
+            long count = res.getDeletedCount();
+            if (count == 0) {
                 return serialize(handlerFailureResponse("error_datasource",
-                        "Given story could not be deleted from collection: " + sStackTrace));
+                        "Delete failed: no document with id " + id + " contained in the database"));
+            } else if (count > 1) {
+                return serialize(handlerFailureResponse("error_datasource",
+                        "WARNING: Multiple (" + count + ") stories with id " + id + "were deleted!"));
             }
+            return serialize(handlerSuccessResponse(id));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Given story could not be inserted into collection: " + sStackTrace));
+                    "Given story could not be deleted from collection: " + sStackTrace));
         }
+
     }
 
 }
