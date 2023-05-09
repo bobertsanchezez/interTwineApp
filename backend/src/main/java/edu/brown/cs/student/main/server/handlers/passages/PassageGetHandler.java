@@ -16,7 +16,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for GET requests to the passages collection.
  */
 public class PassageGetHandler extends MongoDBHandler {
 
@@ -25,6 +25,8 @@ public class PassageGetHandler extends MongoDBHandler {
     }
 
     /**
+     * 
+     * Handles GET requests to the passages collection, involving ...
      * 
      * @param request  the request to handle
      * @param response use to modify properties of the response

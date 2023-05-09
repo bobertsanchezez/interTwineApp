@@ -11,6 +11,10 @@ import org.bson.BsonString;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 
+/**
+ * A POJO representation of a Twine passage. Mirrors the frontend typescript
+ * representation built into Twine for easy transmission.
+ */
 public class Passage implements Bson {
     private int height;
     private boolean highlighted;
@@ -147,6 +151,15 @@ public class Passage implements Bson {
         this.user = user;
     }
 
+    /**
+     * Converts this passage into BsonDocument format for purposes of MongoDB
+     * storage.
+     * 
+     * @param <TDocument>
+     * @param document
+     * @param registry
+     * @return
+     */
     @Override
     public <TDocument> BsonDocument toBsonDocument(Class<TDocument> document, CodecRegistry registry) {
         BsonDocument bsonDocument = new BsonDocument();

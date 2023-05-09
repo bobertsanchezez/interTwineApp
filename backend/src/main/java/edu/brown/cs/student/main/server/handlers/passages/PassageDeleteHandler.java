@@ -1,12 +1,10 @@
 package edu.brown.cs.student.main.server.handlers.passages;
 
 import java.io.StringWriter;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.io.PrintWriter;
 
 import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -20,7 +18,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for DELETE requests to the passages collection.
  */
 public class PassageDeleteHandler extends MongoDBHandler {
 
@@ -29,7 +27,7 @@ public class PassageDeleteHandler extends MongoDBHandler {
     }
 
     /**
-     * 
+     * Handles DELETE requests to the passages collection, involving ...
      *
      * @param request  the request to handle
      * @param response use to modify properties of the response
@@ -48,23 +46,25 @@ public class PassageDeleteHandler extends MongoDBHandler {
         }
         try {
             MongoDatabase database = mongoClient.getDatabase("InterTwine");
-            // delete the passage
             MongoCollection<Document> psgCollection = database.getCollection("passages");
+            MongoCollection<Document> storyCollection = database.getCollection("stories");
+            // delete the passage
             Document psgDoc = new Document("id", id);
             DeleteResult res = psgCollection.deleteOne(psgDoc);
-            // MongoCollection<Document> storiesCollection =
-            // database.getCollection("stories");
-            // Document story = storiesCollection
-            // .find(Filters.elemMatch("passages", Filters.eq("_id", new
-            // ObjectId("passageId")))).first();
-            // List<Document> updatedPassages = story.getList("passages",
-            // Document.class).stream()
-            // .filter(p -> !p.getObjectId("_id").equals(psgDoc.getObjectId(
-            // "_id")))
-            // .collect(Collectors.toList());
-            // Document updatedStory = new Document("passages", updatedPassages);
-            // storiesCollection.updateOne(Filters.eq("_id", story.getObjectId("_id")),
-            // Updates.set("passages", updatedStory.getList("passages", Document.class)));
+            Document story = storyCollection
+                    .find(Filters.elemMatch("passages", Filters.eq("id",
+                            psgDoc.get("id"))))
+                    .first();
+            Document updatedStoryPassages;
+
+            updatedStoryPassages = new Document("passages",
+                    story.getList("passages", Document.class).stream()
+                            .filter(p -> !p.get("id").equals(psgDoc.get("id")))
+                            .collect(Collectors.toList()));
+
+            storyCollection.updateOne(Filters.eq("id", story.get("id")),
+                    Updates.set("passages", updatedStoryPassages.getList("passages",
+                            Document.class)));
             if (res.getDeletedCount() == 0) {
                 return serialize(handlerFailureResponse("error_datasource",
                         "Delete failed: no document with id " + id + " contained in the database"));
