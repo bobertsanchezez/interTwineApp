@@ -17,7 +17,7 @@ import com.mongodb.client.MongoClients;
 public class MongoClientConnection {
     public static MongoClient startConnection() throws MongoException {
         // NOTE: set a system variable containing creds for this to work!
-        String connectionCreds = System.getenv("CONNECTION_CREDS");
+        String connectionCreds = true ? "bchong:8c2ZuVaQcBcAKLOb" : System.getenv("CONNECTION_CREDS");
         if (connectionCreds == null) {
             throw new MongoException("Failed to read connection credentials from file");
         }

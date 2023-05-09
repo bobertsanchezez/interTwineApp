@@ -1,4 +1,4 @@
-package edu.brown.cs32.student.main.HandlerTests;
+package edu.brown.cs32.student.main;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,16 +6,13 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
-import edu.brown.cs32.student.main.server.csv.FactoryFailureException;
-import edu.brown.cs32.student.main.server.handlers.LoadHandler;
-import edu.brown.cs32.student.main.server.handlers.SearchHandler;
-import edu.brown.cs32.student.main.server.handlers.ViewHandler;
+import edu.brown.cs.student.main.server.MongoClientConnection;
+import edu.brown.cs.student.main.server.handlers.passages.PassagePostHandler;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import backend/src/main/java/edu/brown/cs/student/main/server/handlers/passages/PassageDeleteHandler.java;
-
 import java.util.Map;
 import okio.Buffer;
 import java.util.List;
@@ -29,10 +26,9 @@ import spark.Spark;
 
 import com.mongodb.client.MongoClient;
 
-public class TestDeleteHandler {
+public class TestPostHandler {
   @BeforeAll
   public static void setup_before_everything() {
-
     Spark.port(0);
     Logger.getLogger("").setLevel(Level.WARNING);
   }
@@ -45,7 +41,8 @@ public class TestDeleteHandler {
   @BeforeEach
   public void setup() {
     // Server server = new Server();
-    Spark.get("delete", new PassageDeleteHandler(MongoClient));
+    MongoClient mc = MongoClientConnection.startConnection();
+    Spark.get("post", new PassagePostHandler(mc));
     Spark.init();
     Spark.awaitInitialization();
   }
@@ -53,7 +50,7 @@ public class TestDeleteHandler {
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints
-    Spark.unmap("/delete");
+    Spark.unmap("/post");
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
@@ -79,32 +76,15 @@ public class TestDeleteHandler {
     return clientConnection;
   }
 
-  /**
-   * Test if there is an error message when CSV parameter not given
-   * @throws IOException
-   */
+  @Test
+  public void testCorrect() throws IOException {
+    HttpURLConnection clientConnection = tryRequest("post?data={id:1}");
+    assertEquals(200, clientConnection.getResponseCode());    
+  }
 
   @Test
-  // Recall that the "throws IOException" doesn't signify anything but
-  // acknowledgement to the type checker
-  public void testIncorrectArgsLoaded() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("delete&id=1");
-    // Get an OK response (the *connection* worked, the *API* provides an error
-    // response)
-    assertEquals(200, clientConnection.getResponseCode());
-    // Now we need to see whether we've got the expected Json response.
-    // SoupAPIUtilities handles ingredient lists, but that's not what we've got
-    // here.
-    // Moshi moshi = new Moshi.Builder().build();
-    // JsonAdapter<Map<String, Object>> adapter = moshi.adapter(
-    //     Types.newParameterizedType(Map.class, String.class, Object.class));
-
-    // Map resp = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-
-    // assertEquals("error_bad_request", resp.get("result"));
-    // assertEquals("Please input a filepath. Current supported filepaths: [empty.csv, stars.csv, ten-stars.csv]",
-    //     resp.get("errorMessage"));
-
-
-    // clientConnection.disconnect();
+  public void testNoData() throws IOException {
+    HttpURLConnection clientConnection = tryRequest("post");
+    assertEquals(400, clientConnection.getResponseCode());    
   }
+}

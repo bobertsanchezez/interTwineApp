@@ -1,4 +1,4 @@
-package edu.brown.cs32.student.main.testGetHandler;
+package edu.brown.cs32.student.main;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,15 +6,13 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
-import edu.brown.cs32.student.main.server.csv.FactoryFailureException;
-import edu.brown.cs32.student.main.server.handlers.LoadHandler;
-import edu.brown.cs32.student.main.server.handlers.SearchHandler;
-import edu.brown.cs32.student.main.server.handlers.ViewHandler;
+import edu.brown.cs.student.main.server.MongoClientConnection;
+import edu.brown.cs.student.main.server.handlers.passages.PassageGetHandler;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
 import java.util.Map;
 import okio.Buffer;
 import java.util.List;
@@ -26,11 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
+import com.mongodb.client.MongoClient;
 
-public class TestLoadHandler {
+public class TestGetHandler {
   @BeforeAll
   public static void setup_before_everything() {
-
     Spark.port(0);
     Logger.getLogger("").setLevel(Level.WARNING);
   }
@@ -43,10 +41,8 @@ public class TestLoadHandler {
   @BeforeEach
   public void setup() {
     // Server server = new Server();
-    List<List<String>> csv = new ArrayList<>();
-    Spark.get("load", new LoadHandler(csv));
-    Spark.get("search", new SearchHandler(csv));
-    Spark.get("view", new ViewHandler(csv));
+    MongoClient mc = MongoClientConnection.startConnection();
+    Spark.get("get", new PassageGetHandler(mc));
     Spark.init();
     Spark.awaitInitialization();
   }
@@ -54,10 +50,7 @@ public class TestLoadHandler {
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints
-    Spark.unmap("/load");
-    Spark.unmap("/view");
-    Spark.unmap("/search");
-    // Spark.unmap("/weather");
+    Spark.unmap("/get");
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
@@ -83,29 +76,15 @@ public class TestLoadHandler {
     return clientConnection;
   }
 
-  /**
-   * Test if there is an error message when CSV parameter not given
-   * @throws IOException
-   */
+  @Test
+  public void testCorrect() throws IOException {
+    HttpURLConnection clientConnection = tryRequest("get?id=1");
+    assertEquals(200, clientConnection.getResponseCode());    
+  }
 
   @Test
-  // Recall that the "throws IOException" doesn't signify anything but
-  // acknowledgement to the type checker
-  public void testIncorrectArgsLoaded() throws IOException {
+  public void testNoData() throws IOException {
     HttpURLConnection clientConnection = tryRequest("get");
- 
-    assertEquals(200, clientConnection.getResponseCode());
-
-    Moshi moshi = new Moshi.Builder().build();
-    JsonAdapter<Map<String, Object>> adapter = moshi.adapter(
-        Types.newParameterizedType(Map.class, String.class, Object.class));
-
-    Map resp = adapter.fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-
-    assertEquals("error_bad_request", resp.get("result"));
-    //assertEquals("Please input a filepath. Current supported filepaths: [empty.csv, stars.csv, ten-stars.csv]",
-    //    resp.get("errorMessage"));
-
-
-    clientConnection.disconnect();
+    assertEquals(400, clientConnection.getResponseCode());    
   }
+}
