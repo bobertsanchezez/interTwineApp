@@ -1,6 +1,5 @@
 package edu.brown.cs.student.main.server.types;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import org.bson.BsonBoolean;
 import org.bson.BsonDateTime;
 import org.bson.BsonDocument;
 import org.bson.BsonInt32;
-import org.bson.BsonObjectId;
 import org.bson.BsonString;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
@@ -18,7 +16,6 @@ import org.bson.types.ObjectId;
 
 public class Story implements Bson {
 
-    private ObjectId _id;
     /**
      * IFID of the story. An IFID should stay stable when a story is imported or
      * exported.
@@ -102,12 +99,10 @@ public class Story implements Bson {
             String script,
             boolean selected, boolean snapToGrid, String startPassage, String storyFormat, String storyFormatVersion,
             String stylesheet, String[] tags, Map<String, String> tagColors, int zoom, String owner, String[] editors) {
-        this._id = new ObjectId();
         this.ifid = ifid;
         this.id = id;
         this.lastUpdate = lastUpdate;
         this.name = name;
-        this.passageIds = new ArrayList<ObjectId>();
         this.passages = passages;
         this.script = script;
         this.selected = selected;
@@ -121,17 +116,6 @@ public class Story implements Bson {
         this.zoom = zoom;
         this.owner = owner;
         this.editors = editors;
-        // populate passageIds function here!
-    }
-
-    // Getter method for the _id field
-    public ObjectId get_id() {
-        return _id;
-    }
-
-    // Setter method for the _id field
-    public void set_id(ObjectId _id) {
-        this._id = _id;
     }
 
     public String getIfid() {
@@ -286,10 +270,6 @@ public class Story implements Bson {
         bsonDocument.put("lastUpdate", new BsonDateTime(lastUpdate.getTime()));
         bsonDocument.put("name", new BsonString(name));
         BsonArray passageIdsArray = new BsonArray();
-        // TODO UNCOMMENT BELOW WHEN IMPLEMENTING CROSSLINKING (causes error)
-        // for (ObjectId passageId : passageIds) {
-        // passageIdsArray.add(new BsonObjectId(passageId));
-        // }
         bsonDocument.put("passageIds", passageIdsArray);
         BsonArray passagesArray = new BsonArray();
         for (Passage passage : passages) {

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
+import static com.mongodb.client.model.Filters.eq;
+
 import org.bson.BsonDocument;
 import org.bson.Document;
 
@@ -67,9 +69,27 @@ public class PassagePostHandler extends MongoDBHandler {
             MongoDatabase database = mongoClient.getDatabase("InterTwine");
             MongoCollection<Document> collection = database.getCollection("passages");
             BsonDocument bsonDocument = passage.toBsonDocument();
-            Document document = Document.parse(bsonDocument.toJson());
-            collection.insertOne(document);
-            return serialize(handlerSuccessResponse(document));
+            Document newDoc = Document.parse(bsonDocument.toJson());
+            Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
+                    .first();
+
+            System.out.println("PASSAGE POST PRINTS:");
+            System.out.println();
+            System.out.println("psgpost raw data:" + data);
+            System.out.println();
+            System.out.println("psgpost data as doc:" + newDoc.toString());
+            System.out.println();
+
+            if (maybeExistsDoc != null) {
+                // doc already exists in database
+                System.out.println("found passage that already exists:" + maybeExistsDoc.toString());
+                System.out.println();
+                return serialize(handlerSuccessResponse(maybeExistsDoc));
+            } else {
+                // doc doesn't exist; post it
+                collection.insertOne(newDoc);
+                return serialize(handlerSuccessResponse(newDoc));
+            }
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

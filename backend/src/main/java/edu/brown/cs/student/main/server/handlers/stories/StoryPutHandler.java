@@ -8,11 +8,13 @@ import java.io.PrintWriter;
 
 import org.bson.BsonDocument;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.UpdateResult;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
@@ -52,7 +54,7 @@ public class StoryPutHandler extends MongoDBHandler {
             }
             // TODO remove
             String data = request.body();
-            System.out.println(data);
+            // System.out.println("DATA = " + data);
 
             if (data == null) {
                 return serialize(handlerFailureResponse("error_bad_request",
@@ -60,35 +62,39 @@ public class StoryPutHandler extends MongoDBHandler {
             }
             MongoDatabase database = mongoClient.getDatabase("InterTwine");
             MongoCollection<Document> collection = database.getCollection("stories");
-            Moshi moshi = new Moshi.Builder()
-                    .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
-                    .build();
-            JsonAdapter<Story> adapter = moshi.adapter(Story.class);
-            Story story;
+            // Moshi moshi = new Moshi.Builder()
+            // .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
+            // .build();
+            // JsonAdapter<Story> adapter = moshi.adapter(Story.class);
+            // Story story;
+            // try {
+            // story = adapter.fromJson(data);
+            // } catch (JsonDataException | IOException e) {
+            // return serialize(handlerFailureResponse("error_bad_request",
+            // "data payload <data> could not be converted to Story format"));
+            // }
+            // if (story == null) {
+            // return serialize(handlerFailureResponse("error_bad_request",
+            // "data payload <data> was null after json adaptation"));
+            // }
             try {
-                story = adapter.fromJson(data);
-            } catch (JsonDataException | IOException e) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "data payload <data> could not be converted to Story format"));
-            }
-            if (story == null) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "data payload <data> was null after json adaptation"));
-            }
-            try {
-                BsonDocument bsonDocument = story.toBsonDocument();
+                // BsonDocument bsonDocument = story.toBsonDocument();
                 Document filter = new Document("id", id);
-                Document document = Document.parse(bsonDocument.toJson());
+                Document storyDoc = Document.parse(data);
                 ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
-                collection.replaceOne(filter, document, upsertOption);
-                return serialize(handlerSuccessResponse(document));
+                UpdateResult res = collection.replaceOne(filter, storyDoc, upsertOption);
+                System.out.println("STORY PUT PRINTS:");
+                System.out.println("raw data:" + data);
+                System.out.println("data as doc:" + storyDoc.toString());
+                System.out.println("update result:" + res.toString());
+                return serialize(handlerSuccessResponse(storyDoc));
             } catch (Exception e) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 e.printStackTrace(pw);
                 String sStackTrace = sw.toString();
                 return serialize(handlerFailureResponse("error_datasource",
-                        "Given story could not updated: " + sStackTrace));
+                        "Given story could not be updated: " + sStackTrace));
             }
         } catch (Exception e) {
             StringWriter sw = new StringWriter();

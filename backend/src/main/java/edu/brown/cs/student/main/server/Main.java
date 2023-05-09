@@ -32,7 +32,7 @@ public class Main {
         // set up one connection to MongoDB, shared with all servers
         MongoClient mc = MongoClientConnection.startConnection();
 
-        // Setting up HTTP endpoints for stories, passages
+        /// Setting up HTTP endpoints for stories, passages
         // /stories GET, POST, PUT, DELETE endpoints
         Spark.get("/libraryload/:id", new LibraryLoadHandler(mc));
         Spark.get("/stories", new StoryGetHandler(mc));

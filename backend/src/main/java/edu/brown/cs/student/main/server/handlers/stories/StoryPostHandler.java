@@ -9,6 +9,7 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 import java.util.Date;
 
+import static com.mongodb.client.model.Filters.eq;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -49,8 +50,6 @@ public class StoryPostHandler extends MongoDBHandler {
             } else {
                 data = request.queryParams("data");
             }
-            // TODO remove
-            System.out.println(data);
 
             if (data == null) {
                 return serialize(handlerFailureResponse("error_bad_request",
@@ -75,9 +74,22 @@ public class StoryPostHandler extends MongoDBHandler {
                 MongoDatabase database = mongoClient.getDatabase("InterTwine");
                 MongoCollection<Document> collection = database.getCollection("stories");
                 BsonDocument bsonDocument = story.toBsonDocument();
-                Document document = Document.parse(bsonDocument.toJson());
-                collection.insertOne(document);
-                return serialize(handlerSuccessResponse(document));
+                Document newDoc = Document.parse(bsonDocument.toJson());
+                Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
+                        .first();
+                System.out.println("STORY POST PRINTS:");
+                System.out.println("raw data:" + data);
+                System.out.println("data as doc:" + newDoc.toString());
+                if (maybeExistsDoc != null) {
+                    // doc already exists in database
+                    System.out.println("found passage that already exists:" + maybeExistsDoc.toString());
+                    return serialize(handlerSuccessResponse(maybeExistsDoc));
+                } else {
+                    // doc doesn't exist; post it
+                    System.out.println("inserting newDoc");
+                    collection.insertOne(newDoc);
+                    return serialize(handlerSuccessResponse(newDoc));
+                }
             } catch (Exception e) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);

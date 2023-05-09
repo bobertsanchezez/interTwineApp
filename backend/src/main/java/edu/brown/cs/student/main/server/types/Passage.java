@@ -10,10 +10,8 @@ import org.bson.BsonInt32;
 import org.bson.BsonString;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 
 public class Passage implements Bson {
-    private ObjectId _id;
     private int height;
     private boolean highlighted;
     private String id;
@@ -30,7 +28,6 @@ public class Passage implements Bson {
 
     public Passage(int height, boolean highlighted, String id, int left, String name, boolean selected,
             String story, List<String> tags, String text, int top, int width, boolean claimed, String user) {
-        this._id = new ObjectId();
         this.height = height;
         this.highlighted = highlighted;
         this.id = id;
@@ -44,16 +41,6 @@ public class Passage implements Bson {
         this.width = width;
         this.claimed = claimed;
         this.user = user;
-    }
-
-    // Getter method for the _id field
-    public ObjectId get_id() {
-        return _id;
-    }
-
-    // Setter method for the _id field
-    public void set_id(ObjectId _id) {
-        this._id = _id;
     }
 
     public int getHeight() {
