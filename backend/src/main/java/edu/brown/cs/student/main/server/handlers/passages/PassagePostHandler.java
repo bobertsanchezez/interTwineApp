@@ -1,6 +1,8 @@
 package edu.brown.cs.student.main.server.handlers.passages;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -56,8 +58,12 @@ public class PassagePostHandler extends MongoDBHandler {
         try {
             passage = adapter.fromJson(data);
         } catch (JsonDataException | IOException e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> could not be converted to Passage format"));
+                    "data payload <data> could not be converted to Passage format: " + sStackTrace));
         }
         if (passage == null) {
             return serialize(handlerFailureResponse("error_bad_request",

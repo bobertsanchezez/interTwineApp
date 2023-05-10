@@ -8,7 +8,7 @@ import org.bson.BsonArray;
 import org.bson.BsonBoolean;
 import org.bson.BsonDateTime;
 import org.bson.BsonDocument;
-import org.bson.BsonInt32;
+import org.bson.BsonDouble;
 import org.bson.BsonString;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
@@ -80,7 +80,7 @@ public class Story implements Bson {
     /**
      * Zoom level the story is displayed at.
      */
-    private int zoom;
+    private double zoom;
     /**
      * InterTwine Dev Tools under here.
      */
@@ -98,7 +98,8 @@ public class Story implements Bson {
     public Story(String ifid, String id, Date lastUpdate, String name, Passage[] passages,
             String script,
             boolean selected, boolean snapToGrid, String startPassage, String storyFormat, String storyFormatVersion,
-            String stylesheet, String[] tags, Map<String, String> tagColors, int zoom, String owner, String[] editors) {
+            String stylesheet, String[] tags, Map<String, String> tagColors, double zoom, String owner,
+            String[] editors) {
         this.ifid = ifid;
         this.id = id;
         this.lastUpdate = lastUpdate;
@@ -238,11 +239,11 @@ public class Story implements Bson {
         this.tagColors = tagColors;
     }
 
-    public int getZoom() {
+    public double getZoom() {
         return zoom;
     }
 
-    public void setZoom(int zoom) {
+    public void setZoom(double zoom) {
         this.zoom = zoom;
     }
 
@@ -293,7 +294,7 @@ public class Story implements Bson {
             tagColorsDocument.put(key, new BsonString(tagColors.get(key)));
         }
         bsonDocument.put("tagColors", tagColorsDocument);
-        bsonDocument.put("zoom", new BsonInt32(zoom));
+        bsonDocument.put("zoom", new BsonDouble(zoom));
         bsonDocument.put("owner", new BsonString(owner));
         BsonArray editorsArray = new BsonArray();
         for (String editor : editors) {

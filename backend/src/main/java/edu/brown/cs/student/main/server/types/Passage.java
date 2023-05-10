@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.bson.BsonArray;
 import org.bson.BsonBoolean;
 import org.bson.BsonDocument;
+import org.bson.BsonDouble;
 import org.bson.BsonInt32;
 import org.bson.BsonString;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -19,19 +20,19 @@ public class Passage implements Bson {
     private int height;
     private boolean highlighted;
     private String id;
-    private int left;
+    private double left;
     private String name;
     private boolean selected;
     private String story;
     private List<String> tags;
     private String text;
-    private int top;
-    private int width;
+    private double top;
+    private double width;
     private boolean claimed;
     private String user;
 
-    public Passage(int height, boolean highlighted, String id, int left, String name, boolean selected,
-            String story, List<String> tags, String text, int top, int width, boolean claimed, String user) {
+    public Passage(int height, boolean highlighted, String id, double left, String name, boolean selected,
+            String story, List<String> tags, String text, double top, double width, boolean claimed, String user) {
         this.height = height;
         this.highlighted = highlighted;
         this.id = id;
@@ -71,11 +72,11 @@ public class Passage implements Bson {
         this.id = id;
     }
 
-    public int getLeft() {
+    public double getLeft() {
         return left;
     }
 
-    public void setLeft(int left) {
+    public void setLeft(double left) {
         this.left = left;
     }
 
@@ -119,19 +120,19 @@ public class Passage implements Bson {
         this.text = text;
     }
 
-    public int getTop() {
+    public double getTop() {
         return top;
     }
 
-    public void setTop(int top) {
+    public void setTop(double top) {
         this.top = top;
     }
 
-    public int getWidth() {
+    public double getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(double width) {
         this.width = width;
     }
 
@@ -166,14 +167,14 @@ public class Passage implements Bson {
         bsonDocument.put("height", new BsonInt32(this.height));
         bsonDocument.put("highlighted", new BsonBoolean(this.highlighted));
         bsonDocument.put("id", new BsonString(this.id));
-        bsonDocument.put("left", new BsonInt32(this.left));
+        bsonDocument.put("left", new BsonDouble(this.left));
         bsonDocument.put("name", new BsonString(this.name));
         bsonDocument.put("selected", new BsonBoolean(this.selected));
         bsonDocument.put("story", new BsonString(this.story));
         bsonDocument.put("tags", new BsonArray(this.tags.stream().map(BsonString::new).collect(Collectors.toList())));
         bsonDocument.put("text", new BsonString(this.text));
-        bsonDocument.put("top", new BsonInt32(this.top));
-        bsonDocument.put("width", new BsonInt32(this.width));
+        bsonDocument.put("top", new BsonDouble(this.top));
+        bsonDocument.put("width", new BsonDouble(this.width));
         bsonDocument.put("claimed", new BsonBoolean(this.claimed));
         bsonDocument.put("user", new BsonString(this.user));
         return bsonDocument;
