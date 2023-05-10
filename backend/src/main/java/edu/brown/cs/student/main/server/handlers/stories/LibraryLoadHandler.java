@@ -34,13 +34,15 @@ public class LibraryLoadHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        System.out.println("LIBRARY LOAD begun");
+
         try {
 
             String id = request.params("id");
             if (id == null) {
                 return serialize(
                         handlerFailureResponse("error_bad_request",
-                                "story id <id> is a required query parameter (usage: GET request to .../stories?id=12345)"));
+                                "user id <id> is a required query parameter (usage: GET request to .../libraryload/<id>)"));
             }
             MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection("stories");
@@ -49,10 +51,12 @@ public class LibraryLoadHandler extends MongoDBHandler {
             try {
                 // look through all stories for owned/shared stories
                 for (Document doc : collection.find(new Document())) {
-                    if (doc.get("owner") == id) {
+                    if (doc.get("owner").equals(id)) {
                         userStories.add(doc);
+                        // System.out.println("LIBRARY LOAD to send back doc: " + doc.toJson() + "\n");
                     } else {
                         List<String> editors = doc.getList("editors", String.class);
+                        // System.out.println("LIBRARY LOAD test print, id = " + id);
                         if (editors.contains(id)) {
                             userStories.add(doc);
                         }
