@@ -34,7 +34,7 @@ public class LibraryLoadHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        System.out.println("LIBRARY LOAD begun");
+        // System.out.println("LIBRARY LOAD begun");
 
         try {
 
@@ -47,18 +47,18 @@ public class LibraryLoadHandler extends MongoDBHandler {
             MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection("stories");
             // TODO distinguish owned vs shared stories in response
-            ArrayList<Document> userStories = new ArrayList<Document>();
+            ArrayList<String> userStories = new ArrayList<String>();
             try {
                 // look through all stories for owned/shared stories
                 for (Document doc : collection.find(new Document())) {
                     if (doc.get("owner").equals(id)) {
-                        userStories.add(doc);
+                        userStories.add(doc.toJson());
                         // System.out.println("LIBRARY LOAD to send back doc: " + doc.toJson() + "\n");
                     } else {
                         List<String> editors = doc.getList("editors", String.class);
                         // System.out.println("LIBRARY LOAD test print, id = " + id);
                         if (editors.contains(id)) {
-                            userStories.add(doc);
+                            userStories.add(doc.toJson());
                         }
                     }
                 }
