@@ -57,9 +57,13 @@ public class PassageGetHandler extends MongoDBHandler {
         } else {
             if (doc.getBoolean("claimed")) {
                 String userId = doc.getString("user");
-                return serialize(
-                        claimFailureResponse("error_claimed", userId,
-                                "user " + userId + " has already claimed the passage"));
+                if (userId.equals(id)) {
+                    return serialize(handlerSuccessResponse(doc.toJson()));
+                } else {
+                    return serialize(
+                            claimFailureResponse("error_claimed", userId,
+                                    "user " + userId + " has already claimed the passage"));
+                }
             }
             return serialize(handlerSuccessResponse(doc.toJson()));
         }
