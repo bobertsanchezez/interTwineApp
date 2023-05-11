@@ -34,36 +34,38 @@ public class StoryPutHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        String id = request.params("id");
-        String data = request.body();
-        if (id == null) {
-            return serialize(
-                    handlerFailureResponse("error_bad_request",
-                            "story id <id> is a required query parameter (usage: PUT request to .../stories/<id>)"));
-        }
-        if (data == null) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
-        }
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = database.getCollection("stories");
-        try {
-            Document filter = new Document("id", id);
-            Document storyDoc = Document.parse(data);
-            System.out.println("\nSTORY PUT PASSAGES:\n"
-                    + storyDoc.getList("passages", Document.class).stream()
-                            .map(doc -> doc.get("name"))
-                            .collect(Collectors.toList()));
-            ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
-            collection.replaceOne(filter, storyDoc, upsertOption);
-            return serialize(handlerSuccessResponse(storyDoc));
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            String sStackTrace = sw.toString();
-            return serialize(handlerFailureResponse("error_datasource",
-                    "Given story could not be updated: " + sStackTrace));
+        synchronized (lock) {
+            String id = request.params("id");
+            String data = request.body();
+            if (id == null) {
+                return serialize(
+                        handlerFailureResponse("error_bad_request",
+                                "story id <id> is a required query parameter (usage: PUT request to .../stories/<id>)"));
+            }
+            if (data == null) {
+                return serialize(handlerFailureResponse("error_bad_request",
+                        "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
+            }
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
+            MongoCollection<Document> collection = database.getCollection("stories");
+            try {
+                Document filter = new Document("id", id);
+                Document storyDoc = Document.parse(data);
+                System.out.println("\nSTORY PUT PASSAGES:\n"
+                        + storyDoc.getList("passages", Document.class).stream()
+                                .map(doc -> doc.get("name"))
+                                .collect(Collectors.toList()));
+                ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
+                collection.replaceOne(filter, storyDoc, upsertOption);
+                return serialize(handlerSuccessResponse(storyDoc));
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString();
+                return serialize(handlerFailureResponse("error_datasource",
+                        "Given story could not be updated: " + sStackTrace));
+            }
         }
     }
 

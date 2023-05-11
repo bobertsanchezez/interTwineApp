@@ -32,27 +32,30 @@ public class StoryGetHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        String id = request.queryParams("id");
-        if (id == null) {
-            return serialize(
-                    handlerFailureResponse("error_bad_request",
-                            "story id <id> is a required query parameter (usage: GET request to .../stories?id=12345)"));
-        }
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = database.getCollection("stories");
-        Document doc;
-        try {
-            doc = collection.find(eq("id", id))
-                    .first();
-        } catch (MongoException e) {
-            return serialize(
-                    handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
-        }
-        if (doc == null) {
-            return serialize(
-                    handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
-        } else {
-            return serialize(handlerSuccessResponse(doc.toJson()));
+        synchronized (lock) {
+
+            String id = request.queryParams("id");
+            if (id == null) {
+                return serialize(
+                        handlerFailureResponse("error_bad_request",
+                                "story id <id> is a required query parameter (usage: GET request to .../stories?id=12345)"));
+            }
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
+            MongoCollection<Document> collection = database.getCollection("stories");
+            Document doc;
+            try {
+                doc = collection.find(eq("id", id))
+                        .first();
+            } catch (MongoException e) {
+                return serialize(
+                        handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
+            }
+            if (doc == null) {
+                return serialize(
+                        handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
+            } else {
+                return serialize(handlerSuccessResponse(doc.toJson()));
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ import spark.Route;
 public class MongoDBHandler implements Route {
     protected MongoClient mongoClient;
     protected String databaseName;
+    protected static final Object lock = new Object();
 
     /**
      * Constructor for a handler that connects to MongoDB.
