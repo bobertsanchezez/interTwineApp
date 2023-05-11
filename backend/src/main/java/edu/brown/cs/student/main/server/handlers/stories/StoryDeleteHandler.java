@@ -1,16 +1,22 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import static com.mongodb.client.model.Filters.eq;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
 import spark.Request;
 import spark.Response;
 import java.io.StringWriter;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.io.PrintWriter;
 
 /**
@@ -43,10 +49,26 @@ public class StoryDeleteHandler extends MongoDBHandler {
         }
         try {
             MongoDatabase database = mongoClient.getDatabase(databaseName);
-            MongoCollection<Document> collection = database.getCollection("stories");
-            Document toDelete = new Document("id", id);
-            DeleteResult res = collection.deleteOne(toDelete);
-            long count = res.getDeletedCount();
+            MongoCollection<Document> storyCollection = database.getCollection("stories");
+            MongoCollection<Document> psgCollection = database.getCollection("passages");
+
+            // delete story's contained passages
+            Document story = storyCollection.find(eq("id", id))
+                    .first();
+            List<String> storyPassageIds = story.getList("passages", Document.class).stream()
+                    .map(p -> p.getString("id"))
+                    .collect(Collectors.toList());
+
+            Bson massDelFilter = Filters.in("id", storyPassageIds);
+            DeleteResult psgDelRes = psgCollection.deleteMany(massDelFilter);
+            System.out.println("IDs to delete: " + storyPassageIds.toString());
+            System.out.println("Deleted count: " + psgDelRes.getDeletedCount());
+
+            // delete story
+            Document delFilter = new Document("id", id);
+            DeleteResult storyDelRes = storyCollection.deleteOne(delFilter);
+            // check results
+            long count = storyDelRes.getDeletedCount();
             if (count == 0) {
                 return serialize(handlerFailureResponse("error_datasource",
                         "Delete failed: no document with id " + id + " contained in the database"));
@@ -54,6 +76,7 @@ public class StoryDeleteHandler extends MongoDBHandler {
                 return serialize(handlerFailureResponse("error_datasource",
                         "WARNING: Multiple (" + count + ") stories with id " + id + "were deleted!"));
             }
+            // return the id of the story that was deleted
             return serialize(handlerSuccessResponse(id));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();

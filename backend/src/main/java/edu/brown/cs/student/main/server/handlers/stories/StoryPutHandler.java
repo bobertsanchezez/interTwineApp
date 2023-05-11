@@ -1,6 +1,7 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
 import java.io.StringWriter;
+import java.util.stream.Collectors;
 import java.io.PrintWriter;
 
 import org.bson.Document;
@@ -49,6 +50,10 @@ public class StoryPutHandler extends MongoDBHandler {
         try {
             Document filter = new Document("id", id);
             Document storyDoc = Document.parse(data);
+            System.out.println("\nSTORY PUT PASSAGES:\n"
+                    + storyDoc.getList("passages", Document.class).stream()
+                            .map(doc -> doc.get("name"))
+                            .collect(Collectors.toList()));
             ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
             collection.replaceOne(filter, storyDoc, upsertOption);
             return serialize(handlerSuccessResponse(storyDoc));
