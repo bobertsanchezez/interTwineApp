@@ -2,9 +2,6 @@ package edu.brown.cs.student.main.server.handlers.passages;
 
 import java.io.IOException;
 
-import java.io.StringWriter;
-import java.io.PrintWriter;
-
 import static com.mongodb.client.model.Filters.eq;
 
 import org.bson.BsonDocument;
@@ -23,15 +20,16 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for POST requests to the passages collection.
  */
 public class PassagePostHandler extends MongoDBHandler {
 
-    public PassagePostHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public PassagePostHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
+     * Handles POST requests to the passages collection, involving ...
      * 
      *
      * @param request  the request to handle
@@ -65,38 +63,20 @@ public class PassagePostHandler extends MongoDBHandler {
             return serialize(handlerFailureResponse("error_bad_request",
                     "data payload <data> was null after json adaptation"));
         }
-        try {
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
-            MongoCollection<Document> collection = database.getCollection("passages");
-            BsonDocument bsonDocument = passage.toBsonDocument();
-            Document newDoc = Document.parse(bsonDocument.toJson());
-            Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
-                    .first();
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
+        MongoCollection<Document> collection = database.getCollection("passages");
+        BsonDocument bsonDocument = passage.toBsonDocument();
+        Document newDoc = Document.parse(bsonDocument.toJson());
+        Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
+                .first();
 
-            System.out.println("PASSAGE POST PRINTS:");
-            System.out.println();
-            System.out.println("psgpost raw data:" + data);
-            System.out.println();
-            System.out.println("psgpost data as doc:" + newDoc.toString());
-            System.out.println();
-
-            if (maybeExistsDoc != null) {
-                // doc already exists in database
-                System.out.println("found passage that already exists:" + maybeExistsDoc.toString());
-                System.out.println();
-                return serialize(handlerSuccessResponse(maybeExistsDoc));
-            } else {
-                // doc doesn't exist; post it
-                collection.insertOne(newDoc);
-                return serialize(handlerSuccessResponse(newDoc));
-            }
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            String sStackTrace = sw.toString();
-            return serialize(handlerFailureResponse("error_datasource",
-                    "Given passage could not be inserted into collection: " + sStackTrace));
+        if (maybeExistsDoc != null) {
+            // doc already exists in database
+            return serialize(handlerSuccessResponse(maybeExistsDoc));
+        } else {
+            // doc doesn't exist; post it
+            collection.insertOne(newDoc);
+            return serialize(handlerSuccessResponse(newDoc));
         }
 
     }

@@ -1,4 +1,4 @@
-package edu.brown.cs32.student.main;
+package edu.brown.cs32.student.main.stories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,7 +7,8 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.MongoClientConnection;
-import edu.brown.cs.student.main.server.handlers.passages.PassagePostHandler;
+import edu.brown.cs.student.main.server.handlers.passages.PassagePutHandler;
+import edu.brown.cs32.student.main.TestUtil;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -26,7 +27,7 @@ import spark.Spark;
 
 import com.mongodb.client.MongoClient;
 
-public class TestPostHandler {
+public class TestPutHandler {
   @BeforeAll
   public static void setup_before_everything() {
     Spark.port(0);
@@ -42,7 +43,7 @@ public class TestPostHandler {
   public void setup() {
     // Server server = new Server();
     MongoClient mc = MongoClientConnection.startConnection();
-    Spark.get("post", new PassagePostHandler(mc));
+    Spark.get("put", new PassagePutHandler(mc, TestUtil.databaseName));
     Spark.init();
     Spark.awaitInitialization();
   }
@@ -50,7 +51,7 @@ public class TestPostHandler {
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints
-    Spark.unmap("/post");
+    Spark.unmap("/put");
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
@@ -78,13 +79,13 @@ public class TestPostHandler {
 
   @Test
   public void testCorrect() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("post?data={id:1}");
-    assertEquals(200, clientConnection.getResponseCode());    
+    HttpURLConnection clientConnection = tryRequest("put?id=1");
+    assertEquals(200, clientConnection.getResponseCode());
   }
 
   @Test
   public void testNoData() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("post");
-    assertEquals(400, clientConnection.getResponseCode());    
+    HttpURLConnection clientConnection = tryRequest("put");
+    assertEquals(400, clientConnection.getResponseCode());
   }
 }

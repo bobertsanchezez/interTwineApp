@@ -1,0 +1,35 @@
+{
+  "id": "c1e360e8-adfa-424b-a713-49fb04615ced",
+  "ifid": "8278EA7E-AAC2-4ACF-A16E-0972E93D3658",
+  "lastUpdate": "2023-05-09T20:13:13.276Z",
+  "passages": [
+    {
+      "height": 100,
+      "highlighted": false,
+      "left": 425,
+      "name": "Untitled Passage",
+      "selected": false,
+      "tags": [],
+      "text": "",
+      "top": 275,
+      "width": 100,
+      "claimed": false,
+      "user": "",
+      "id": "70ee2fca-8eb4-496d-a5b8-7b688b4d1ab3",
+      "story": "c1e360e8-adfa-424b-a713-49fb04615ced"
+    }
+  ],
+  "name": "new-story",
+  "script": "",
+  "selected": false,
+  "snapToGrid": true,
+  "startPassage": "70ee2fca-8eb4-496d-a5b8-7b688b4d1ab3",
+  "storyFormat": "Harlowe",
+  "storyFormatVersion": "3.3.5",
+  "stylesheet": "",
+  "tags": [],
+  "tagColors": {},
+  "zoom": 1,
+  "owner": "google-oauth2|test",
+  "editors": ["google-oauth2|test"]
+}

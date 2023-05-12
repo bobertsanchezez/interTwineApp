@@ -16,15 +16,17 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for GET requests to the passages collection.
  */
 public class PassageGetHandler extends MongoDBHandler {
 
-    public PassageGetHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public PassageGetHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
+     * 
+     * Handles GET requests to the passages collection, involving ...
      * 
      * @param request  the request to handle
      * @param response use to modify properties of the response
@@ -39,7 +41,7 @@ public class PassageGetHandler extends MongoDBHandler {
                     handlerFailureResponse("error_bad_request",
                             "passage id <id> is a required query parameter (usage: GET request to .../passages?id=12345)"));
         }
-        MongoDatabase database = mongoClient.getDatabase("InterTwine");
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> collection = database.getCollection("passages");
         Document doc;
         try {

@@ -1,41 +1,30 @@
 package edu.brown.cs.student.main.server.handlers.stories;
 
-import java.io.IOException;
-
 import java.io.StringWriter;
-import java.util.Date;
 import java.io.PrintWriter;
 
-import org.bson.BsonDocument;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOptions;
-import com.mongodb.client.result.UpdateResult;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.JsonDataException;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter;
 
 import edu.brown.cs.student.main.server.handlers.MongoDBHandler;
-import edu.brown.cs.student.main.server.types.Story;
 import spark.Request;
 import spark.Response;
 
 /**
- * Handler class for the redlining API endpoint.
+ * Handler class for PUT requests to the stories collection.
  */
 public class StoryPutHandler extends MongoDBHandler {
 
-    public StoryPutHandler(MongoClient mongoClient) {
-        super(mongoClient);
+    public StoryPutHandler(MongoClient mongoClient, String databaseName) {
+        super(mongoClient, databaseName);
     }
 
     /**
-     * 
+     * Handles PUT requests to the stories collection, involving ...
      *
      * @param request  the request to handle
      * @param response use to modify properties of the response
@@ -44,65 +33,32 @@ public class StoryPutHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        String id = request.params("id");
+        String data = request.body();
+        if (id == null) {
+            return serialize(
+                    handlerFailureResponse("error_bad_request",
+                            "story id <id> is a required query parameter (usage: PUT request to .../stories/<id>)"));
+        }
+        if (data == null) {
+            return serialize(handlerFailureResponse("error_bad_request",
+                    "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
+        }
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
+        MongoCollection<Document> collection = database.getCollection("stories");
         try {
-
-            String id = request.params("id");
-            if (id == null) {
-                return serialize(
-                        handlerFailureResponse("error_bad_request",
-                                "story id <id> is a required query parameter (usage: PUT request to .../stories/<id>)"));
-            }
-            // TODO remove
-            String data = request.body();
-            // System.out.println("DATA = " + data);
-
-            if (data == null) {
-                return serialize(handlerFailureResponse("error_bad_request",
-                        "data payload <data> must be supplied as query param OR content body (jsonified Story data)"));
-            }
-            MongoDatabase database = mongoClient.getDatabase("InterTwine");
-            MongoCollection<Document> collection = database.getCollection("stories");
-            // Moshi moshi = new Moshi.Builder()
-            // .add(Date.class, new Rfc3339DateJsonAdapter().nullSafe())
-            // .build();
-            // JsonAdapter<Story> adapter = moshi.adapter(Story.class);
-            // Story story;
-            // try {
-            // story = adapter.fromJson(data);
-            // } catch (JsonDataException | IOException e) {
-            // return serialize(handlerFailureResponse("error_bad_request",
-            // "data payload <data> could not be converted to Story format"));
-            // }
-            // if (story == null) {
-            // return serialize(handlerFailureResponse("error_bad_request",
-            // "data payload <data> was null after json adaptation"));
-            // }
-            try {
-                // BsonDocument bsonDocument = story.toBsonDocument();
-                Document filter = new Document("id", id);
-                Document storyDoc = Document.parse(data);
-                ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
-                UpdateResult res = collection.replaceOne(filter, storyDoc, upsertOption);
-                System.out.println("STORY PUT PRINTS:");
-                System.out.println("raw data:" + data);
-                System.out.println("data as doc:" + storyDoc.toString());
-                System.out.println("update result:" + res.toString());
-                return serialize(handlerSuccessResponse(storyDoc));
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                String sStackTrace = sw.toString();
-                return serialize(handlerFailureResponse("error_datasource",
-                        "Given story could not be updated: " + sStackTrace));
-            }
+            Document filter = new Document("id", id);
+            Document storyDoc = Document.parse(data);
+            ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
+            collection.replaceOne(filter, storyDoc, upsertOption);
+            return serialize(handlerSuccessResponse(storyDoc));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String sStackTrace = sw.toString();
             return serialize(handlerFailureResponse("error_datasource",
-                    "Given story could not be inserted into collection: " + sStackTrace));
+                    "Given story could not be updated: " + sStackTrace));
         }
     }
 
