@@ -1,0 +1,35 @@
+{
+  "id": "c1e360e8-adfa-424b-a713-49fb04615test3",
+  "ifid": "8278EA7E-AAC2-4ACF-A16E-0972E93D3658",
+  "lastUpdate": "2023-05-09T20:13:13.276Z",
+  "passages": [
+    {
+      "height": 100,
+      "highlighted": false,
+      "left": 425,
+      "name": "passage",
+      "selected": false,
+      "tags": [],
+      "text": "this is a passage",
+      "top": 275,
+      "width": 100,
+      "claimed": true,
+      "user": "google-oauth2|test",
+      "id": "bc64a920-dac1-460f-b689-8d49d2840etest",
+      "story": "c1e360e8-adfa-424b-a713-49fb04615test3"
+    }
+  ],
+  "name": "story_3",
+  "script": "",
+  "selected": false,
+  "snapToGrid": true,
+  "startPassage": "bc64a920-dac1-460f-b689-8d49d2840etest",
+  "storyFormat": "Harlowe",
+  "storyFormatVersion": "3.3.5",
+  "stylesheet": "story stylesheet stuff here",
+  "tags": [],
+  "tagColors": {},
+  "zoom": 1,
+  "owner": "google-oauth2|test",
+  "editors": ["google-oauth2|test"]
+}

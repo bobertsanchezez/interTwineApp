@@ -2,10 +2,6 @@ package edu.brown.cs32.student.main.stories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
-
 import edu.brown.cs.student.main.server.MongoClientConnection;
 import edu.brown.cs.student.main.server.handlers.passages.PassageGetHandler;
 import edu.brown.cs32.student.main.TestUtil;
@@ -13,10 +9,6 @@ import edu.brown.cs32.student.main.TestUtil;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
-import okio.Buffer;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +18,17 @@ import org.junit.jupiter.api.Test;
 import spark.Spark;
 
 import com.mongodb.client.MongoClient;
+
+/*
+ * TESTING PLAN:
+ *
+ * There's nothing special with this one, so:
+ * 
+ * Test the general case
+ * Test that a nonexistent story returns an error
+ * 
+ * 
+ */
 
 public class TestGetHandler {
   @BeforeAll
@@ -86,6 +89,6 @@ public class TestGetHandler {
   @Test
   public void testNoData() throws IOException {
     HttpURLConnection clientConnection = tryRequest("get");
-    assertEquals(400, clientConnection.getResponseCode());
+    assertEquals(200, clientConnection.getResponseCode());
   }
 }

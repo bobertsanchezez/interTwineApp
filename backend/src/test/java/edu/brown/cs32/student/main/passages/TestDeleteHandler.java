@@ -2,21 +2,12 @@ package edu.brown.cs32.student.main.passages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
-
 import edu.brown.cs.student.main.server.MongoClientConnection;
 import edu.brown.cs.student.main.server.handlers.passages.PassageDeleteHandler;
 import edu.brown.cs32.student.main.TestUtil;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
-import okio.Buffer;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +17,15 @@ import org.junit.jupiter.api.Test;
 import spark.Spark;
 
 import com.mongodb.client.MongoClient;
+
+/*
+ * TESTING PLAN:
+ * 
+ * Test that passages are deleted from their respective stories upon deletion
+ * Test that different kinds of passages can be deleted
+ * Test for malformed / nonexistent ids
+ * 
+ */
 
 public class TestDeleteHandler {
   @BeforeAll

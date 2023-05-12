@@ -41,48 +41,58 @@ public class PassagePostHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        String data;
-        if (request.body().length() != 0) {
-            data = request.body();
-        } else {
-            data = request.queryParams("data");
-        }
-
-        if (data == null) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
-        }
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);
-        Passage passage;
         try {
-            passage = adapter.fromJson(data);
-        } catch (JsonDataException | IOException e) {
+
+            String data;
+            if (request.body().length() != 0) {
+                data = request.body();
+            } else {
+                data = request.queryParams("data");
+            }
+
+            if (data == null) {
+                return serialize(handlerFailureResponse("error_bad_request",
+                        "data payload <data> must be supplied as query param OR content body (jsonified Passage data)"));
+            }
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<Passage> adapter = moshi.adapter(Passage.class);
+            Passage passage;
+            try {
+                passage = adapter.fromJson(data);
+            } catch (JsonDataException | IOException e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                String sStackTrace = sw.toString();
+                return serialize(handlerFailureResponse("error_bad_request",
+                        "data payload <data> could not be converted to Passage format: " + sStackTrace));
+            }
+            if (passage == null) {
+                return serialize(handlerFailureResponse("error_bad_request",
+                        "data payload <data> was null after json adaptation"));
+            }
+            MongoDatabase database = mongoClient.getDatabase(databaseName);
+            MongoCollection<Document> collection = database.getCollection("passages");
+            BsonDocument bsonDocument = passage.toBsonDocument();
+            Document newDoc = Document.parse(bsonDocument.toJson());
+            Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
+                    .first();
+
+            if (maybeExistsDoc != null) {
+                // doc already exists in database
+                return serialize(handlerSuccessResponse(maybeExistsDoc));
+            } else {
+                // doc doesn't exist; post it
+                collection.insertOne(newDoc);
+                return serialize(handlerSuccessResponse(newDoc));
+            }
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String sStackTrace = sw.toString();
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> could not be converted to Passage format: " + sStackTrace));
-        }
-        if (passage == null) {
-            return serialize(handlerFailureResponse("error_bad_request",
-                    "data payload <data> was null after json adaptation"));
-        }
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = database.getCollection("passages");
-        BsonDocument bsonDocument = passage.toBsonDocument();
-        Document newDoc = Document.parse(bsonDocument.toJson());
-        Document maybeExistsDoc = collection.find(eq("id", newDoc.get("id")))
-                .first();
-
-        if (maybeExistsDoc != null) {
-            // doc already exists in database
-            return serialize(handlerSuccessResponse(maybeExistsDoc));
-        } else {
-            // doc doesn't exist; post it
-            collection.insertOne(newDoc);
-            return serialize(handlerSuccessResponse(newDoc));
+            return serialize(handlerFailureResponse("error_datasource",
+                    "Given story could not be updated: " + sStackTrace));
         }
 
     }

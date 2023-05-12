@@ -34,8 +34,6 @@ public class LibraryLoadHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        // System.out.println("LIBRARY LOAD begun");
-
         try {
 
             String id = request.params("id");
@@ -46,7 +44,6 @@ public class LibraryLoadHandler extends MongoDBHandler {
             }
             MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection("stories");
-            // TODO distinguish owned vs shared stories in response
             ArrayList<String> userStories = new ArrayList<String>();
             try {
                 // look through all stories for owned/shared stories

@@ -1,9 +1,9 @@
-package edu.brown.cs32.student.main.passages;
+package edu.brown.cs32.student.main.stories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.brown.cs.student.main.server.MongoClientConnection;
-import edu.brown.cs.student.main.server.handlers.passages.PassagePutHandler;
+import edu.brown.cs.student.main.server.handlers.stories.LibraryLoadHandler;
 import edu.brown.cs32.student.main.TestUtil;
 
 import java.io.IOException;
@@ -19,7 +19,17 @@ import spark.Spark;
 
 import com.mongodb.client.MongoClient;
 
-public class TestPutHandler {
+/*
+ * TESTING PLAN:
+ *
+ * Test for a request with user that owns stories, and a request for different 
+ * user with no stories, and check for difference
+ * Test for requests for shared stories, make sure they show up
+ * Test for owner + different shared user both receiving story
+ * 
+ */
+
+public class TestLibLoadHandler {
   @BeforeAll
   public static void setup_before_everything() {
     Spark.port(0);
@@ -33,9 +43,8 @@ public class TestPutHandler {
    */
   @BeforeEach
   public void setup() {
-    // Server server = new Server();
     MongoClient mc = MongoClientConnection.startConnection();
-    Spark.get("put", new PassagePutHandler(mc, TestUtil.databaseName));
+    Spark.get("get", new LibraryLoadHandler(mc, TestUtil.databaseName));
     Spark.init();
     Spark.awaitInitialization();
   }
@@ -43,7 +52,7 @@ public class TestPutHandler {
   @AfterEach
   public void teardown() {
     // Gracefully stop Spark listening on both endpoints
-    Spark.unmap("/put");
+    Spark.unmap("/get");
     Spark.awaitStop(); // don't proceed until the server is stopped
   }
 
@@ -71,13 +80,13 @@ public class TestPutHandler {
 
   @Test
   public void testCorrect() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("put?id=1");
+    HttpURLConnection clientConnection = tryRequest("get?id=1");
     assertEquals(200, clientConnection.getResponseCode());
   }
 
   @Test
   public void testNoData() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("put");
-    assertEquals(400, clientConnection.getResponseCode());
+    HttpURLConnection clientConnection = tryRequest("get");
+    assertEquals(200, clientConnection.getResponseCode());
   }
 }
