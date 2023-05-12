@@ -61,7 +61,7 @@ public class TestDeleteHandler {
   @Test
   public void testWrongRequestMethod() throws IOException {
 
-    HttpURLConnection clientConnection = TestUtil.tryRequest("passages/", "GET");
+    HttpURLConnection clientConnection = TestUtil.tryRequest("passages/", "DELETE");
 
     assertEquals(200, clientConnection.getResponseCode());
   }
