@@ -35,11 +35,20 @@ public class PassageGetHandler extends MongoDBHandler {
      */
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        // id of passage to get
         String id = request.queryParams("id");
+        // identity of InterTwine user
+        String user = request.queryParams("user");
+
         if (id == null) {
             return serialize(
                     handlerFailureResponse("error_bad_request",
-                            "passage id <id> is a required query parameter (usage: GET request to .../passages?id=12345)"));
+                            "passage id <id> is a required query parameter (usage: GET request to .../passages?id=12345&user=emailhere)"));
+        }
+        if (user == null) {
+            return serialize(
+                    handlerFailureResponse("error_bad_request",
+                            "passage user <user> is a required query parameter (usage: GET request to .../passages?id=12345&user=emailhere)"));
         }
         MongoDatabase database = mongoClient.getDatabase(databaseName);
         MongoCollection<Document> collection = database.getCollection("passages");
@@ -56,8 +65,8 @@ public class PassageGetHandler extends MongoDBHandler {
                     handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
         } else {
             String userId = doc.getString("user");
-            System.out.println("userId = " + userId + ", id = " + id);
-            if (userId.equals(id) || userId.equals("") || userId == null) {
+            System.out.println("userId = " + userId + ", user = " + user);
+            if (userId.equals(user) || userId.equals("") || userId == null) {
                 return serialize(handlerSuccessResponse(doc.toJson()));
             } else {
                 return serialize(
