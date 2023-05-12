@@ -55,17 +55,15 @@ public class PassageGetHandler extends MongoDBHandler {
             return serialize(
                     handlerFailureResponse("error_datasource", "id " + id + " does not exist in the database"));
         } else {
-            if (doc.getBoolean("claimed")) {
-                String userId = doc.getString("user");
-                if (userId.equals(id)) {
-                    return serialize(handlerSuccessResponse(doc.toJson()));
-                } else {
-                    return serialize(
-                            claimFailureResponse("error_claimed", userId,
-                                    "user " + userId + " has already claimed the passage"));
-                }
+            String userId = doc.getString("user");
+            System.out.println("userId = " + userId + ", id = " + id);
+            if (userId.equals(id) || userId.equals("") || userId == null) {
+                return serialize(handlerSuccessResponse(doc.toJson()));
+            } else {
+                return serialize(
+                        claimFailureResponse("error_claimed", userId,
+                                "user " + userId + " has already claimed the passage"));
             }
-            return serialize(handlerSuccessResponse(doc.toJson()));
         }
 
     }
