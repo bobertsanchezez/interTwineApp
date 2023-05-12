@@ -47,6 +47,8 @@ public class Main {
         Spark.delete("/passages/:id", new PassageDeleteHandler(mc));
 
         // Options setup
+
+        
         Spark.options("/*", (request, response) -> {
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
             if (accessControlRequestHeaders != null) {

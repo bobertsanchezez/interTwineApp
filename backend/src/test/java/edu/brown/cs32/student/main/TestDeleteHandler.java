@@ -70,7 +70,8 @@ public class TestDeleteHandler {
 
     // The default method is "GET", which is what we're using here.
     // If we were using "POST", we'd need to say so.
-    // clientConnection.setRequestMethod("GET");
+    // clientConnection.
+    setRequestMethod("GET");
 
     clientConnection.connect();
     return clientConnection;

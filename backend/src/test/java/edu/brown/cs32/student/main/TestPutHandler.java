@@ -7,7 +7,6 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
 import edu.brown.cs.student.main.server.MongoClientConnection;
-import edu.brown.cs.student.main.server.handlers.passages.PassagePostHandler;
 import edu.brown.cs.student.main.server.handlers.passages.PassagePutHandler;
 
 import java.io.IOException;
